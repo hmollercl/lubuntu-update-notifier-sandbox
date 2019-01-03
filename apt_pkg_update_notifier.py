@@ -8,11 +8,15 @@ import apt_pkg
 from PyQt5.QtWidgets import (QWidget, QApplication, QDialog)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import QStandardItemModel
+from PyQt5.QtGui import (QStandardItemModel, QIcon)
 import os
 from optparse import OptionParser
 import gettext
 import subprocess
+'''
+from aptdaemon import client
+from aptdaemon.errors import NotAuthorizedError, TransactionFailed
+'''
 
 class Dialog(QWidget):
     def __init__(self, depcache, cache, upgrades, security_updates):
@@ -24,29 +28,32 @@ class Dialog(QWidget):
         self.buttonBox.rejected.connect(self.call_reject)
         
     def initUI(self):
-        self.label.setText("There are %s upgrades available and %s security updates available, do you want to open the Update Software? \n This are the affected packages" % (upgrades, security_updates))
+        self.label.setText("There are %s upgrades available and %s security updates available, do you want to open the Update Software? \n The following are the affected packages" % (upgrades, security_updates))
         self.model = self.createViewModel(self)
         self.treeView.setModel(self.model)
         self.treeView.setRootIsDecorated(False)
         self.treeView.setAlternatingRowColors(True)
         
-        #index=0
+        install_pkgs = []
+        remove_pkgs = []
+        upgrade_pkgs = []
+        
         for pkg in cache.packages:
             if depcache.marked_install(pkg):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Install")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                #index = index+1
+                install_pkgs.append(pkg.name)
             elif depcache.marked_upgrade(pkg):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Upgrade")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                #index = index+1
+                upgrade_pkgs.append(pkg.name)
             elif depcache.marked_delete(pkg):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Delete")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                #index = index+1
+                remove_pkgs.append(pkg.name)
         
         self.treeView.setSortingEnabled(True)
         self.treeView.sortByColumn(0,Qt.SortOrder())
@@ -69,6 +76,26 @@ class Dialog(QWidget):
         process.waitForStarted()
         #app.quit()
         
+        '''
+        fprogress = apt.progress.base.FetchProgress()
+        iprogress = apt.progress.base.InstallProgress()
+        depcache.commit(fprogress, iprogress)
+        '''
+        '''
+        self.apt_client = client.AptClient()
+        try:
+            self.transaction = self.apt_client.commit_packages(install=install_pkgs, remove=remove_pkgs, reinstall=[], purge=[], upgrade=upgrade_pkgs, downgrade=[])
+            self.transaction.connect('progress-changed', self.on_driver_changes_progress)
+            self.transaction.connect('cancellable-changed', self.on_driver_changes_cancellable_changed)
+            self.transaction.connect('finished', self.on_driver_changes_finish)
+            self.transaction.connect('error', self.on_driver_changes_error)
+            self.transaction.run()
+            self.button_driver_revert.setEnabled(False)
+            self.button_driver_apply.setEnabled(False)
+        
+        except (NotAuthorizedError, TransactionFailed) as e:
+            print("Warning: install transaction not completed successfully: {}".format(e))
+        '''
     def call_reject(self):
         app.quit()
 
@@ -83,7 +110,7 @@ class App(QApplication):
 def main(args, depcache, cache, upgrades, security_updates):
     global app
     app = App(depcache, cache, upgrades, security_updates, args)
-    #print(pkg_number)
+    app.setWindowIcon(QIcon.fromTheme("system-software-update"))
     app.exec_()
 
 ############################ END QT#######################
