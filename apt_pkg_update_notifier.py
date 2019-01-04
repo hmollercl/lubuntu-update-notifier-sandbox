@@ -13,11 +13,69 @@ import os
 from optparse import OptionParser
 import gettext
 import subprocess
-'''
+
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
-'''
 
+'''
+class UpdateDialog(QDialog): #último popUp
+    def __init__(self):
+        QWidget.__init__(self)
+        uic.loadUi("designer/update_dialog.ui", self)
+        self.buttonBox.accepted.connect(self.aceptar)
+        
+    def aceptar(self):
+        app.quit()
+        
+        
+    def on_driver_changes_progress(self, transaction, progress):
+        #self.button_driver_revert.setVisible(False)
+        #self.button_driver_apply.setVisible(False)
+        #self.button_driver_restart.setVisible(False)
+        #self.buttonBox.rejected.setVisible(True)
+        #self.progressBar.setVisible(True)
+
+        #self.label.setText("Applying changes...")
+        self.progressBar.setValue(progress)
+
+    def on_driver_changes_finish(self, transaction, exit_state):
+        Dialog.label.setText("Installation Complete")
+        #self.progress_bar.setVisible(False)
+        #self.clear_changes()
+        #self.apt_cache = apt.Cache()
+        #self.set_driver_action_status()
+        #self.update_label_and_icons_from_status()
+        #self.button_driver_revert.setVisible(True)
+        #self.button_driver_apply.setVisible(True)
+        #self.button_driver_cancel.setVisible(False)
+        self.buttonBox.rejected.setVisible(False)
+        #self.scrolled_window_drivers.set_sensitive(True)
+
+    def on_driver_changes_error(self, transaction, error_code, error_details):
+        #self.on_driver_changes_revert()
+        #self.set_driver_action_status()
+        #self.update_label_and_icons_from_status()
+        #self.button_driver_revert.setVisible(True)
+        #self.button_driver_apply.setVisible(True)
+        self.button_driver_cancel.setVisible(False)
+        #self.scrolled_window_drivers.set_sensitive(True)
+
+  def on_driver_changes_cancellable_changed(self, transaction, cancellable):
+    self.button_driver_cancel.setEnabled(cancellable)
+
+        self.apt_client = client.AptClient()
+        try:
+            self.transaction = self.apt_client.commit_packages(install=install_pkgs, remove=remove_pkgs, reinstall=[], purge=[], upgrade=upgrade_pkgs, downgrade=[])
+            self.transaction.connect('progress-changed', self.progress)
+            self.transaction.connect('cancellable-changed', self.cancellable_changed)
+            progress-download-changed → uri, short_desc, total_size, current_size, msg
+            self.transaction.connect('finished', self.finish)
+            self.transaction.connect('error', self.error)
+            self.transaction.run()
+        
+        except (NotAuthorizedError, TransactionFailed) as e:
+            print("Warning: install transaction not completed successfully: {}".format(e))
+'''
 class Dialog(QWidget):
     def __init__(self, depcache, cache, upgrades, security_updates):
         QWidget.__init__(self)
@@ -29,14 +87,16 @@ class Dialog(QWidget):
         
     def initUI(self):
         self.label.setText("There are %s upgrades available and %s security updates available, do you want to open the Update Software? \n The following are the affected packages" % (upgrades, security_updates))
+        #self.label.setText("There are %s upgrades available and %s security updates available, do you want to Update? \n The following are the affected packages:" % (upgrades, security_updates))
         self.model = self.createViewModel(self)
         self.treeView.setModel(self.model)
         self.treeView.setRootIsDecorated(False)
         self.treeView.setAlternatingRowColors(True)
+        self.progressBar.setVisible(False)
         
-        install_pkgs = []
-        remove_pkgs = []
-        upgrade_pkgs = []
+        self.install_pkgs = []
+        self.remove_pkgs = []
+        self.upgrade_pkgs = []
         
         for pkg in cache.packages:
             if depcache.marked_install(pkg):
@@ -58,7 +118,40 @@ class Dialog(QWidget):
         self.treeView.setSortingEnabled(True)
         self.treeView.sortByColumn(0,Qt.SortOrder())
         self.treeView.setSortingEnabled(False)
-                
+                #self.button_driver_revert.setVisible(False)
+        #self.button_driver_apply.setVisible(False)
+        #self.button_driver_restart.setVisible(False)
+        #self.buttonBox.rejected.setVisible(True)
+        #self.progressBar.setVisible(True)
+
+        #self.label.setText("Applying changes...")
+        self.progressBar.setValue(progress)
+
+    def on_driver_changes_finish(self, transaction, exit_state):
+        Dialog.label.setText("Installation Complete")
+        #self.progress_bar.setVisible(False)
+        #self.clear_changes()
+        #self.apt_cache = apt.Cache()
+        #self.set_driver_action_status()
+        #self.update_label_and_icons_from_status()
+        #self.button_driver_revert.setVisible(True)
+        #self.button_driver_apply.setVisible(True)
+        #self.button_driver_cancel.setVisible(False)
+        self.buttonBox.rejected.setVisible(False)
+        #self.scrolled_window_drivers.set_sensitive(True)
+
+    def on_driver_changes_error(self, transaction, error_code, error_details):
+        #self.on_driver_changes_revert()
+        #self.set_driver_action_status()
+        #self.update_label_and_icons_from_status()
+        #self.button_driver_revert.setVisible(True)
+        #self.button_driver_apply.setVisible(True)
+        self.button_driver_cancel.setVisible(False)
+        #self.scrolled_window_drivers.set_sensitive(True)
+
+    def on_driver_changes_cancellable_changed(self, transaction, cancellable):
+        self.button_driver_cancel.setEnabled(cancellable)
+
     def createViewModel(self,parent):
         model = QStandardItemModel(0 , 2, parent)
         model.setHeaderData(0, Qt.Horizontal, "Action")
@@ -81,21 +174,24 @@ class Dialog(QWidget):
         iprogress = apt.progress.base.InstallProgress()
         depcache.commit(fprogress, iprogress)
         '''
-        '''
+    def update(self)
+        self.progressBar.setVisible(False)
+        self.treeView.setVisible(False)
+        
         self.apt_client = client.AptClient()
         try:
-            self.transaction = self.apt_client.commit_packages(install=install_pkgs, remove=remove_pkgs, reinstall=[], purge=[], upgrade=upgrade_pkgs, downgrade=[])
-            self.transaction.connect('progress-changed', self.on_driver_changes_progress)
-            self.transaction.connect('cancellable-changed', self.on_driver_changes_cancellable_changed)
-            self.transaction.connect('finished', self.on_driver_changes_finish)
-            self.transaction.connect('error', self.on_driver_changes_error)
+            self.transaction = self.apt_client.commit_packages(install=self.install_pkgs, remove=self.remove_pkgs, reinstall=[], purge=[], upgrade=self.upgrade_pkgs, downgrade=[])
+            self.transaction.connect('progress-changed', self.progress)
+            self.transaction.connect('cancellable-changed', self.cancellable_changed)
+            #progress-download-changed → uri, short_desc, total_size, current_size, msg
+            #progress-details-changed → current_items, total_items, currenty_bytes, total_bytes, current_cps, eta
+            self.transaction.connect('finished', self.finish)
+            self.transaction.connect('error', self.error)
             self.transaction.run()
-            self.button_driver_revert.setEnabled(False)
-            self.button_driver_apply.setEnabled(False)
         
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully: {}".format(e))
-        '''
+        
     def call_reject(self):
         app.quit()
 
