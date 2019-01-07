@@ -33,10 +33,7 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         
         if self.upgrades > 0:
-            self.label.setText("There are %s upgrades available and %s security"+
-                               " updates available, do you want to Upgrade, open the "+
-                               "Update Software or Close? \n The following are the "+
-                               "affected packages:" % (upgrades, security_updates))
+            self.label.setText("There are %s upgrades available and %s security updates available, do you want to Upgrade, open the Update Software or Close? \n The following are the affected packages:" % (upgrades, security_updates))
             #self.label.setText("There are %s upgrades available and %s security updates available, do you want to Update? \n The following are the affected packages:" % (upgrades, security_updates))
             self.model = self.createViewModel(self)
             self.treeView.setModel(self.model)
@@ -79,11 +76,14 @@ class Dialog(QWidget):
         self.upgrade_swBtn.setVisible(False)
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
+        self.label.setText("Applying changes...")
+
     
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 currenty_bytes, total_bytes, current_cps, eta):
-        self.label.setText("Applying changes... " + str(current_items) + " of "
-                           + str(total_items))
+        self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+        print(current_items)
+        print(total_items)
 
     def upgrade_finish(self, transaction, exit_state):
         text = "Installation Complete"
@@ -98,6 +98,7 @@ class Dialog(QWidget):
         self.closeBtn.setVisible(True)
         self.upgradeBtn.setVisible(False)
         self.upgrade_swBtn.setVisible(False)
+        self.closeBtn.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
         self.upgradeBtn.setVisible(False)
@@ -301,7 +302,7 @@ def run():
 
 
 if __name__ == "__main__":
-    sys.excepthook = _handleException
+    #sys.excepthook = _handleException
 
     # gettext
     APP = "update-notifier"
