@@ -5,7 +5,7 @@ import sys
 import apt
 import apt_pkg
 #import apt.progress.base
-from PyQt5.QtWidgets import (QWidget, QApplication, QDialog)
+from PyQt5.QtWidgets import (QWidget, QApplication)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
@@ -16,140 +16,93 @@ import subprocess
 
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
+from pathlib import Path
 
-'''
-class UpdateDialog(QDialog): #último popUp
-    def __init__(self):
-        QWidget.__init__(self)
-        uic.loadUi("designer/update_dialog.ui", self)
-        self.buttonBox.accepted.connect(self.aceptar)
-        
-    def aceptar(self):
-        app.quit()
-        
-        
-    def on_driver_changes_progress(self, transaction, progress):
-        #self.button_driver_revert.setVisible(False)
-        #self.button_driver_apply.setVisible(False)
-        #self.button_driver_restart.setVisible(False)
-        #self.buttonBox.rejected.setVisible(True)
-        #self.progressBar.setVisible(True)
-
-        #self.label.setText("Applying changes...")
-        self.progressBar.setValue(progress)
-
-    def on_driver_changes_finish(self, transaction, exit_state):
-        Dialog.label.setText("Installation Complete")
-        #self.progress_bar.setVisible(False)
-        #self.clear_changes()
-        #self.apt_cache = apt.Cache()
-        #self.set_driver_action_status()
-        #self.update_label_and_icons_from_status()
-        #self.button_driver_revert.setVisible(True)
-        #self.button_driver_apply.setVisible(True)
-        #self.button_driver_cancel.setVisible(False)
-        self.buttonBox.rejected.setVisible(False)
-        #self.scrolled_window_drivers.set_sensitive(True)
-
-    def on_driver_changes_error(self, transaction, error_code, error_details):
-        #self.on_driver_changes_revert()
-        #self.set_driver_action_status()
-        #self.update_label_and_icons_from_status()
-        #self.button_driver_revert.setVisible(True)
-        #self.button_driver_apply.setVisible(True)
-        self.button_driver_cancel.setVisible(False)
-        #self.scrolled_window_drivers.set_sensitive(True)
-
-  def on_driver_changes_cancellable_changed(self, transaction, cancellable):
-    self.button_driver_cancel.setEnabled(cancellable)
-
-        self.apt_client = client.AptClient()
-        try:
-            self.transaction = self.apt_client.commit_packages(install=install_pkgs, remove=remove_pkgs, reinstall=[], purge=[], upgrade=upgrade_pkgs, downgrade=[])
-            self.transaction.connect('progress-changed', self.progress)
-            self.transaction.connect('cancellable-changed', self.cancellable_changed)
-            progress-download-changed → uri, short_desc, total_size, current_size, msg
-            self.transaction.connect('finished', self.finish)
-            self.transaction.connect('error', self.error)
-            self.transaction.run()
-        
-        except (NotAuthorizedError, TransactionFailed) as e:
-            print("Warning: install transaction not completed successfully: {}".format(e))
-'''
 class Dialog(QWidget):
     def __init__(self, depcache, cache, upgrades, security_updates):
         QWidget.__init__(self)
         uic.loadUi("designer/update_notifier.ui", self)
+        self.upgrades = upgrades
+        
         self.initUI()
-        self.buttonBox.accepted.connect(self.call_update_software)
-        #self.buttonBox.Open.connect(self.call_update_software)
-        self.buttonBox.rejected.connect(self.call_reject)
+        self.upgrade_swBtn.clicked.connect(self.call_update_software)
+        self.upgradeBtn.clicked.connect(self.upgrade)
+        self.closeBtn.clicked.connect(self.call_reject)
         
     def initUI(self):
-        self.label.setText("There are %s upgrades available and %s security updates available, do you want to open the Update Software? \n The following are the affected packages" % (upgrades, security_updates))
-        #self.label.setText("There are %s upgrades available and %s security updates available, do you want to Update? \n The following are the affected packages:" % (upgrades, security_updates))
-        self.model = self.createViewModel(self)
-        self.treeView.setModel(self.model)
-        self.treeView.setRootIsDecorated(False)
-        self.treeView.setAlternatingRowColors(True)
         self.progressBar.setVisible(False)
         
-        self.install_pkgs = []
-        self.remove_pkgs = []
-        self.upgrade_pkgs = []
+        if self.upgrades > 0:
+            self.label.setText("There are %s upgrades available and %s security updates available, do you want to Upgrade, open the Update Software or Close? \n The following are the affected packages:" % (upgrades, security_updates))
+            #self.label.setText("There are %s upgrades available and %s security updates available, do you want to Update? \n The following are the affected packages:" % (upgrades, security_updates))
+            self.model = self.createViewModel(self)
+            self.treeView.setModel(self.model)
+            self.treeView.setRootIsDecorated(False)
+            self.treeView.setAlternatingRowColors(True)
+            
+            self.install_pkgs = []
+            self.remove_pkgs = []
+            self.upgrade_pkgs = []
+            
+            for pkg in cache.packages:
+                if depcache.marked_install(pkg):
+                    self.model.insertRow(0)
+                    self.model.setData(self.model.index(0, 0), "Install")
+                    self.model.setData(self.model.index(0, 1), pkg.name)
+                    self.install_pkgs.append(pkg.name)
+                elif depcache.marked_upgrade(pkg):
+                    self.model.insertRow(0)
+                    self.model.setData(self.model.index(0, 0), "Upgrade")
+                    self.model.setData(self.model.index(0, 1), pkg.name)
+                    self.upgrade_pkgs.append(pkg.name)
+                elif depcache.marked_delete(pkg):
+                    self.model.insertRow(0)
+                    self.model.setData(self.model.index(0, 0), "Delete")
+                    self.model.setData(self.model.index(0, 1), pkg.name)
+                    self.remove_pkgs.append(pkg.name)
+            
+            self.treeView.setSortingEnabled(True)
+            self.treeView.sortByColumn(0,Qt.SortOrder())
+            self.treeView.setSortingEnabled(False)
+
+        else:
+            self.label.setText("Restart Needed")
+            self.upgradeBtn.setVisible(False)
+            self.upgrade_swBtn.setVisible(False)
+            self.setVisible(False)
+            
+    def upgrade_progress(self, transaction, progress):
+        self.upgradeBtn.setVisible(False)
+        self.upgrade_swBtn.setVisible(False)
+        self.progressBar.setVisible(True)
+        self.progressBar.setValue(progress)
+    
+    def upgrade_progress_detail(self, transaction, current_items, total_items, currenty_bytes, total_bytes, current_cps, eta):
+        self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+
+    def upgrade_finish(self, transaction, exit_state):
+        text = "Installation Complete"
+        if reboot_required_path.exists():
+            text = text + "\n" + "Restart required"
+        self.progressBar.setVisible(False)
         
-        for pkg in cache.packages:
-            if depcache.marked_install(pkg):
-                self.model.insertRow(0)
-                self.model.setData(self.model.index(0, 0), "Install")
-                self.model.setData(self.model.index(0, 1), pkg.name)
-                self.install_pkgs.append(pkg.name)
-            elif depcache.marked_upgrade(pkg):
-                self.model.insertRow(0)
-                self.model.setData(self.model.index(0, 0), "Upgrade")
-                self.model.setData(self.model.index(0, 1), pkg.name)
-                self.upgrade_pkgs.append(pkg.name)
-            elif depcache.marked_delete(pkg):
-                self.model.insertRow(0)
-                self.model.setData(self.model.index(0, 0), "Delete")
-                self.model.setData(self.model.index(0, 1), pkg.name)
-                self.remove_pkgs.append(pkg.name)
+        for error in self.errors:
+            text = text + "\n" + error
         
-        self.treeView.setSortingEnabled(True)
-        self.treeView.sortByColumn(0,Qt.SortOrder())
-        self.treeView.setSortingEnabled(False)
-                #self.button_driver_revert.setVisible(False)
-        #self.button_driver_apply.setVisible(False)
-        #self.button_driver_restart.setVisible(False)
-        #self.buttonBox.rejected.setVisible(True)
-        #self.progressBar.setVisible(True)
+        self.label.setText(text)
+        self.closeBtn.setVisible(True)
+        self.upgradeBtn.setVisible(False)
+        self.upgrade_swBtn.setVisible(False)
 
-        #self.label.setText("Applying changes...")
+    def upgrade_error(self, transaction, error_code, error_details):
+        self.upgradeBtn.setVisible(False)
+        self.upgrade_swBtn.setVisible(False)
+        self.errors.append(error_details)
+        self.label.setText(error_details)
+        self.closeBtn.setEnabled(True)
 
-    def on_driver_changes_finish(self, transaction, exit_state):
-        Dialog.label.setText("Installation Complete")
-        #self.progress_bar.setVisible(False)
-        #self.clear_changes()
-        #self.apt_cache = apt.Cache()
-        #self.set_driver_action_status()
-        #self.update_label_and_icons_from_status()
-        #self.button_driver_revert.setVisible(True)
-        #self.button_driver_apply.setVisible(True)
-        #self.button_driver_cancel.setVisible(False)
-        self.buttonBox.rejected.setVisible(False)
-        #self.scrolled_window_drivers.set_sensitive(True)
-
-    def on_driver_changes_error(self, transaction, error_code, error_details):
-        #self.on_driver_changes_revert()
-        #self.set_driver_action_status()
-        #self.update_label_and_icons_from_status()
-        #self.button_driver_revert.setVisible(True)
-        #self.button_driver_apply.setVisible(True)
-        self.button_driver_cancel.setVisible(False)
-        #self.scrolled_window_drivers.set_sensitive(True)
-
-    def on_driver_changes_cancellable_changed(self, transaction, cancellable):
-        self.button_driver_cancel.setEnabled(cancellable)
+    def upgrade_cancellable_changed(self, transaction, cancellable):
+        self.closeBtn.setEnabled(cancellable)
 
     def createViewModel(self,parent):
         model = QStandardItemModel(0 , 2, parent)
@@ -173,19 +126,21 @@ class Dialog(QWidget):
         iprogress = apt.progress.base.InstallProgress()
         depcache.commit(fprogress, iprogress)
         '''
-    def update(self):
+    def upgrade(self):
         self.progressBar.setVisible(False)
         self.treeView.setVisible(False)
+        self.errors = []
+        self.label.setText("Applying changes...")
         
         self.apt_client = client.AptClient()
         try:
-            self.transaction = self.apt_client.commit_packages(install=self.install_pkgs, remove=self.remove_pkgs, reinstall=[], purge=[], upgrade=self.upgrade_pkgs, downgrade=[])
-            self.transaction.connect('progress-changed', self.progress)
-            self.transaction.connect('cancellable-changed', self.cancellable_changed)
-            #progress-download-changed → uri, short_desc, total_size, current_size, msg
-            #progress-details-changed → current_items, total_items, currenty_bytes, total_bytes, current_cps, eta
-            self.transaction.connect('finished', self.finish)
-            self.transaction.connect('error', self.error)
+            #self.transaction = self.apt_client.commit_packages(install=self.install_pkgs, remove=self.remove_pkgs, reinstall=[], purge=[], upgrade=self.upgrade_pkgs, downgrade=[])
+            self.transaction = self.apt_client.upgrade_system(safe_mode=False)
+            self.transaction.connect('progress-changed', self.upgrade_progress)
+            self.transaction.connect('cancellable-changed', self.upgrade_cancellable_changed)
+            self.transaction.connect('progress-details-changed', self.upgrade_progress_detail)
+            self.transaction.connect('finished', self.upgrade_finish)
+            self.transaction.connect('error', self.upgrade_error)
             self.transaction.run()
         
         except (NotAuthorizedError, TransactionFailed) as e:
@@ -197,7 +152,6 @@ class Dialog(QWidget):
 class App(QApplication):
     def __init__(self, depcache, cache, upgrades, security_updates, *args):
         QApplication.__init__(self, *args)
-        #self.pkg_number = pkg_number
         self.dialog = Dialog(depcache, cache, upgrades, security_updates)
         self.dialog.show()
 
@@ -213,7 +167,6 @@ SYNAPTIC_PINFILE = "/var/lib/synaptic/preferences"
 DISTRO = subprocess.check_output(
     ["lsb_release", "-c", "-s"],
     universal_newlines=True).strip()
-
 
 def _(msg):
     return gettext.dgettext("update-notifier", msg)
@@ -232,7 +185,7 @@ def clean(cache, depcache):
     depcache.init()
 
 def saveDistUpgrade(cache, depcache):
-    """ this function mimics a upgrade but will never remove anything unless clean is commented"""
+    """ this function mimics a upgrade but will never remove anything, unless clean is commented"""
     depcache.upgrade(True)
     '''if depcache.del_count > 0:
         clean(cache, depcache)
@@ -348,8 +301,15 @@ if __name__ == "__main__":
     gettext.bindtextdomain(APP, DIR)
     gettext.textdomain(APP)
     
+    global reboot_required_path
+    reboot_required_path = Path("/var/run/reboot-required")
+    
     init()
     (depcache, cache, upgrades, security_updates) = run()
         
     if upgrades > 0:
         main(sys.argv, depcache, cache, upgrades, security_updates)
+        
+    # check "/var/run/reboot-required" (.pkgs) if exists reboot is needed.
+    if reboot_required_path.exists():
+        main(sys.argv, depcache, cache, 0, 0)
