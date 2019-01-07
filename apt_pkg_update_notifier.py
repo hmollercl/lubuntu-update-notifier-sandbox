@@ -103,17 +103,17 @@ class Dialog(QWidget):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Install")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                install_pkgs.append(pkg.name)
+                self.install_pkgs.append(pkg.name)
             elif depcache.marked_upgrade(pkg):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Upgrade")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                upgrade_pkgs.append(pkg.name)
+                self.upgrade_pkgs.append(pkg.name)
             elif depcache.marked_delete(pkg):
                 self.model.insertRow(0)
                 self.model.setData(self.model.index(0, 0), "Delete")
                 self.model.setData(self.model.index(0, 1), pkg.name)
-                remove_pkgs.append(pkg.name)
+                self.remove_pkgs.append(pkg.name)
         
         self.treeView.setSortingEnabled(True)
         self.treeView.sortByColumn(0,Qt.SortOrder())
@@ -125,7 +125,6 @@ class Dialog(QWidget):
         #self.progressBar.setVisible(True)
 
         #self.label.setText("Applying changes...")
-        self.progressBar.setValue(progress)
 
     def on_driver_changes_finish(self, transaction, exit_state):
         Dialog.label.setText("Installation Complete")
@@ -174,7 +173,7 @@ class Dialog(QWidget):
         iprogress = apt.progress.base.InstallProgress()
         depcache.commit(fprogress, iprogress)
         '''
-    def update(self)
+    def update(self):
         self.progressBar.setVisible(False)
         self.treeView.setVisible(False)
         
