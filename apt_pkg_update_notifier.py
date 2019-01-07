@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 #based on apt_check.py
-
 import sys
 import apt
 import apt_pkg
@@ -10,6 +9,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
 import os
+import time
 from optparse import OptionParser
 import gettext
 import subprocess
@@ -33,7 +33,10 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         
         if self.upgrades > 0:
-            self.label.setText("There are %s upgrades available and %s security updates available, do you want to Upgrade, open the Update Software or Close? \n The following are the affected packages:" % (upgrades, security_updates))
+            self.label.setText("There are %s upgrades available and %s security"+
+                               " updates available, do you want to Upgrade, open the "+
+                               "Update Software or Close? \n The following are the "+
+                               "affected packages:" % (upgrades, security_updates))
             #self.label.setText("There are %s upgrades available and %s security updates available, do you want to Update? \n The following are the affected packages:" % (upgrades, security_updates))
             self.model = self.createViewModel(self)
             self.treeView.setModel(self.model)
@@ -77,8 +80,10 @@ class Dialog(QWidget):
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
     
-    def upgrade_progress_detail(self, transaction, current_items, total_items, currenty_bytes, total_bytes, current_cps, eta):
-        self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+    def upgrade_progress_detail(self, transaction, current_items, total_items,
+                                currenty_bytes, total_bytes, current_cps, eta):
+        self.label.setText("Applying changes... " + str(current_items) + " of "
+                           + str(total_items))
 
     def upgrade_finish(self, transaction, exit_state):
         text = "Installation Complete"
@@ -137,14 +142,17 @@ class Dialog(QWidget):
             #self.transaction = self.apt_client.commit_packages(install=self.install_pkgs, remove=self.remove_pkgs, reinstall=[], purge=[], upgrade=self.upgrade_pkgs, downgrade=[])
             self.transaction = self.apt_client.upgrade_system(safe_mode=False)
             self.transaction.connect('progress-changed', self.upgrade_progress)
-            self.transaction.connect('cancellable-changed', self.upgrade_cancellable_changed)
-            self.transaction.connect('progress-details-changed', self.upgrade_progress_detail)
+            self.transaction.connect('cancellable-changed', 
+                                     self.upgrade_cancellable_changed)
+            self.transaction.connect('progress-details-changed', 
+                                     self.upgrade_progress_detail)
             self.transaction.connect('finished', self.upgrade_finish)
             self.transaction.connect('error', self.upgrade_error)
             self.transaction.run()
         
         except (NotAuthorizedError, TransactionFailed) as e:
-            print("Warning: install transaction not completed successfully: {}".format(e))
+            print("Warning: install transaction not completed successfully:" +
+                  "{}".format(e))
         
     def call_reject(self):
         app.quit()
@@ -162,7 +170,7 @@ def main(args, depcache, cache, upgrades, security_updates):
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
     app.exec_()
 
-############################ END QT#######################
+############################ END QT############################################
 SYNAPTIC_PINFILE = "/var/lib/synaptic/preferences"
 DISTRO = subprocess.check_output(
     ["lsb_release", "-c", "-s"],
@@ -293,7 +301,7 @@ def run():
 
 
 if __name__ == "__main__":
-    #sys.excepthook = _handleException
+    sys.excepthook = _handleException
 
     # gettext
     APP = "update-notifier"
@@ -303,7 +311,7 @@ if __name__ == "__main__":
     
     global reboot_required_path
     reboot_required_path = Path("/var/run/reboot-required")
-    
+
     init()
     (depcache, cache, upgrades, security_updates) = run()
         
@@ -313,3 +321,4 @@ if __name__ == "__main__":
     # check "/var/run/reboot-required" (.pkgs) if exists reboot is needed.
     if reboot_required_path.exists():
         main(sys.argv, depcache, cache, 0, 0)
+        
