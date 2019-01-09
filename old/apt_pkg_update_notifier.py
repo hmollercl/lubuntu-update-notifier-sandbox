@@ -1,9 +1,11 @@
 #!/usr/bin/python3
-#based on apt_check.py
+# based on apt_check.py
+# or
+# we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
+#
 import sys
 import apt
 import apt_pkg
-#import apt.progress.base
 from PyQt5.QtWidgets import (QWidget, QApplication)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
@@ -79,14 +81,38 @@ class Dialog(QWidget):
         self.label.setText("Applying changes...")
 
     
+    def upgrade_progress_download(self, transaction, uri, status, short_desc, 
+                                  total_size, current_size, msg):
+        self.downloadText = "Downloading " + short_desc
+        self.label.setText(self.detailText + "\n" + self.downloadText)
+        #print("download")
+        #print(uri)
+        #print(short_desc)
+        #print(current_size)
+        #print(total_size)
+        #print(msg)
+        
+    
     def upgrade_progress_detail(self, transaction, current_items, total_items,
-                                currenty_bytes, total_bytes, current_cps, eta):
-        self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
-        print(current_items)
-        print(total_items)
+                                current_bytes, total_bytes, current_cps, eta):
+        #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+        if total_items > 0:
+            self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
+            if self.downloadText in locals():
+                self.label.setText(self.detailText + "\n" + self.downloadText)
+            else:
+                self.label.setText(self.detailText)
+        
+        #print("detail")
+        #print(current_items)
+        #print(total_items)
+        #print(current_bytes)
+        #print(total_bytes)
+        #print(current_cps)
+        #print(eta)
 
     def upgrade_finish(self, transaction, exit_state):
-        text = "Installation Complete"
+        text = "Upgrade Complete"
         if reboot_required_path.exists():
             text = text + "\n" + "Restart required"
         self.progressBar.setVisible(False)
@@ -147,6 +173,8 @@ class Dialog(QWidget):
                                      self.upgrade_cancellable_changed)
             self.transaction.connect('progress-details-changed', 
                                      self.upgrade_progress_detail)
+            self.transaction.connect('progress-download-changed', 
+                                     self.upgrade_progress_download)
             self.transaction.connect('finished', self.upgrade_finish)
             self.transaction.connect('error', self.upgrade_error)
             self.transaction.run()
@@ -219,6 +247,20 @@ def init():
 
 
 def run():
+
+    # we are run in "are security updates installed automatically?"
+    # question mode
+    '''
+    if options.security_updates_unattended:
+        res = apt_pkg.config.find_i("APT::Periodic::Unattended-Upgrade", 0)
+        # print(res)
+        sys.exit(res)
+     '''
+     '''
+     if options.update_cache
+        apt_client = client.AptClient()
+        trans = apt_client.update_cache(wait=True)
+     '''
     # get caches
     try:
         cache = apt_pkg.Cache(apt.progress.base.OpProgress())
