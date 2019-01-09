@@ -22,13 +22,8 @@ class update_worker_t():
                 parts = result.trimmed().split(";")
                 try:
                     self.upgrades = int(parts[0]) #for python list
-                except:
-                    print ("PARSING OUTPUT FAILED")
-                    return
-                try:
                     self.security_upgrades = int(parts[1])
                 except:
-                    #emit error("PARSING OUTPUT FAILED",temporary_failure)
                     print ("PARSING OUTPUT FAILED")
                     return
                 #emit updates_available(upgrades,security_upgrades)
