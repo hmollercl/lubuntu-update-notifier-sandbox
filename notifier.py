@@ -9,6 +9,7 @@ from PyQt5.QtGui import QIcon
 from pathlib import Path
 
 from update_worker import update_worker_t
+import subprocess
 
 class Dialog(QWidget):
     def __init__(self, upgrades, security_upgrades, reboot_required):
@@ -17,18 +18,18 @@ class Dialog(QWidget):
         self.security_upgrades = security_upgrades
         
         self.initUI()
-        #self.upgradeBtn.clicked.connect(self.upgrade)
+        self.upgradeBtn.clicked.connect(self.call_upgrade)
         self.closeBtn.clicked.connect(self.call_reject)
         
     def initUI(self):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignHCenter)
-        #self.upgradeBtn = QPushButton("Upgrade")
+        self.upgradeBtn = QPushButton("Upgrade")
         self.closeBtn = QPushButton("Close")
         
         hbox=QHBoxLayout()
         hbox.addStretch(1)
-        #hbox.addWidget(self.upgradeBtn)
+        hbox.addWidget(self.upgradeBtn)
         hbox.addWidget(self.closeBtn)
         hbox.addStretch(1)
         
@@ -49,6 +50,18 @@ class Dialog(QWidget):
 
     def call_reject(self):
         app.quit()
+    
+    def call_upgrade(self):
+        upg_path= "./upgrader.py"
+        '''
+        process = QProcess()
+        process.startDetached()
+        out = process.start(upg_path)
+        print(out)
+        process.waitForStarted()
+        #app.quit()
+        '''
+        subprocess.call(upg_path)
 
 class App(QApplication):
     def __init__(self, upgrades, security_upgrades, reboot_required, *args):

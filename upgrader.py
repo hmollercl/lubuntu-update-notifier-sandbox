@@ -12,7 +12,7 @@ from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
 #import os
 #import time
-#from optparse import OptionParser
+from optparse import OptionParser
 #import gettext
 #import subprocess
 
@@ -21,7 +21,7 @@ from aptdaemon.errors import NotAuthorizedError, TransactionFailed
 from pathlib import Path
 
 class Dialog(QWidget):
-    def __init__(self, cacheUpdate, fullUpgrade):
+    def __init__(self, options=None):
         QWidget.__init__(self)
         #uic.loadUi("designer/update_notifier.ui", self)
         
@@ -30,12 +30,12 @@ class Dialog(QWidget):
         self.apt_client = client.AptClient()
         self.downloadText = ""
         
-        if fullUpgrade:
+        if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
         else:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=True)
         
-        if cacheUpdate:
+        if options.cacheUpdate:
             self.trans1 = self.apt_client.update_cache()
             self.update_cache()
         else:
@@ -130,8 +130,8 @@ class Dialog(QWidget):
             self.trans1.connect('finished', self.update_finish)
             
             self.trans1.connect('progress-changed', self.update_progress)
-            #trans1.connect('progress-details-changed', 
-            #                         self.update_progress_detail)
+            self.trans1.connect('progress-details-changed', 
+                                     self.update_progress_detail)
             self.trans1.connect('progress-download-changed', 
                                      self.update_progress_download)
             self.trans1.connect('error', self.upgrade_error)
@@ -173,20 +173,37 @@ class Dialog(QWidget):
         app.quit()
 
 class App(QApplication):
-    def __init__(self, cacheUpdate, fullUpgrade, *args):
+    def __init__(self, options, *args):
         QApplication.__init__(self, *args)
-        self.dialog = Dialog(cacheUpdate, fullUpgrade)
+        self.dialog = Dialog(options)
         self.dialog.show()
 
 
-def main(args, cacheUpdate, fullUpgrade):
+def main(args, options):
     global app
-    app = App(cacheUpdate, fullUpgrade, args)
+    app = App(options, args)
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
     app.exec_()
 
 
 if __name__ == "__main__":
-    cacheUpdate = True
-    fullUpgrade = False
-    main(sys.argv, cacheUpdate, fullUpgrade)
+    # check arguments
+    parser = OptionParser()
+    parser.add_option("",
+                      "--cache-update",
+                      action="store_true",
+                      dest="cacheUpdate",
+                      help="Update Cache Before Upgrade")
+    parser.add_option("",
+                      "--full-upgrade",
+                      action="store_true",
+                      dest="fullUpgrade",
+                      help="Full upgrade same as dist-upgrade")
+    (options, args) = parser.parse_args()
+    
+    #cacheUpdate = False
+    #fullUpgrade = False
+    
+    #run it
+    
+    main(sys.argv, options)
