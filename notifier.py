@@ -1,13 +1,10 @@
 #!/usr/bin/python3
-# based on apt_check.py
-# or
-# we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
-#
+# 
+
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import QIcon
-#import os
 
 from pathlib import Path
 
@@ -20,19 +17,18 @@ class Dialog(QWidget):
         self.security_upgrades = security_upgrades
         
         self.initUI()
-        #self.upgrade_swBtn.clicked.connect(self.call_update_software)
         #self.upgradeBtn.clicked.connect(self.upgrade)
         self.closeBtn.clicked.connect(self.call_reject)
         
     def initUI(self):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignHCenter)
-        #self.upgrade_swBtn
-        #self.upgrade_swBtn
+        #self.upgradeBtn = QPushButton("Upgrade")
         self.closeBtn = QPushButton("Close")
         
         hbox=QHBoxLayout()
         hbox.addStretch(1)
+        #hbox.addWidget(self.upgradeBtn)
         hbox.addWidget(self.closeBtn)
         hbox.addStretch(1)
         
@@ -42,7 +38,7 @@ class Dialog(QWidget):
         
         self.setLayout(vbox) 
         self.setGeometry(300, 300, 300, 150)
-        self.setWindowTitle('Update Notifier')
+        self.setWindowTitle("Update Notifier")
         
         if self.upgrades > 0:
             text = "There are %s upgrades available and %s security updates available" % (self.upgrades, self.security_upgrades)
@@ -70,7 +66,6 @@ if __name__ == "__main__":
     worker = update_worker_t()
     worker.check_for_updates()
     
-    global reboot_required_path
     reboot_required_path = Path("/var/run/reboot-required")
     if reboot_required_path.exists():
         reboot_required = True
@@ -78,5 +73,4 @@ if __name__ == "__main__":
         reboot_required = False
         
     if worker.upgrades > 0 or reboot_required:
-        #main(sys.argv, depcache, cache, upgrades, security_updates)
         main(sys.argv, worker.upgrades, worker.security_upgrades, reboot_required)

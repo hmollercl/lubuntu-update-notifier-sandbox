@@ -7,8 +7,8 @@ from PyQt5.QtCore import QProcess
 class update_worker_t():
     def __init__(self):
         self.m_runner = QProcess()
-        self.upgrades
-        self.security_upgrades
+        self.upgrades = 0
+        self.security_upgrades = 0
         
     def check_for_updates(self):
         if self.m_runner.state() == QProcess.NotRunning:
@@ -17,11 +17,11 @@ class update_worker_t():
             self.m_runner.start(apt_check)
             self.m_runner.waitForFinished()
              
-            if (self.m_runner.exitStatus() == QProcess.NormalExit and self.m_runner.exitCode()==0):
+            if (self.m_runner.exitStatus() == QProcess.NormalExit and self.m_runner.exitCode() == 0):
                 result = self.m_runner.readAllStandardError()
                 parts = result.trimmed().split(";")
                 try:
-                    self.upgrades = int(parts[0]) #for python list
+                    self.upgrades = int(parts[0])
                     self.security_upgrades = int(parts[1])
                 except:
                     print ("PARSING OUTPUT FAILED")
@@ -40,12 +40,7 @@ class update_worker_t():
     
         else:
             print ("ALREADY RUNNING")
-
-    def upgrades(self):
-        return self.upgrades
-    
-    def security_upgrades(self):
-        return self.security_upgrades
+            
 '''    
 worker = update_worker_t()
 worker.check_for_updates()
