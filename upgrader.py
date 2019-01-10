@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-
+# based on apt_check.py
+# or
+# we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
+#
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView)
 from PyQt5 import uic
@@ -13,6 +16,7 @@ from pathlib import Path
 class Dialog(QWidget):
     def __init__(self, options=None):
         QWidget.__init__(self)
+        
         self.initUI()
         self.closeBtn.clicked.connect(self.call_reject)
         self.apt_client = client.AptClient()
@@ -103,9 +107,7 @@ class Dialog(QWidget):
 
     def upgrade_error(self, transaction, error_code, error_details):
         self.errors.append(error_details)
-       #cacheUpdate = False
-    #fullUpgrade = False
-     self.label.setText(error_details)
+        self.label.setText(error_details)
         self.closeBtn.setEnabled(True)
         print(error_details)
 
