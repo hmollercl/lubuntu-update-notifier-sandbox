@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Depend oon
+# Depend on
 # update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
 #
 from PyQt5.QtCore import QProcess
@@ -26,24 +26,9 @@ class update_worker_t():
                 except:
                     print ("PARSING OUTPUT FAILED")
                     return
-                #emit updates_available(upgrades,security_upgrades)
-                #print ("updates available " + str(self.upgrades) + "," + str(self.security_upgrades))
-            #elif m_runner.exitCode()==255:
-            #    qDebug() << m_runner->exitStatus() << m_runner->state() << m_runner->error() << m_runner->errorString()
-            #    emit error(QString("RUNNER FAILED"),temporary_failure)
-            #else:
-            #    qDebug() << m_runner->exitStatus() << m_runner->state() << m_runner->error() << m_runner->errorString()
-            #    emit error(QString("RUNNER FAILED"),permanent_failure)
             else:
                 print(self.m_runner.exitStatus())
                 print(self.m_runner.exitCode())
     
         else:
             print ("ALREADY RUNNING")
-            
-'''    
-worker = update_worker_t()
-worker.check_for_updates()
-print(worker.upgrades)
-print(worker.security_upgrades)
-'''

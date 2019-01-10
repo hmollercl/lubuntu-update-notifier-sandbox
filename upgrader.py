@@ -1,21 +1,11 @@
 #!/usr/bin/python3
-# based on apt_check.py
-# or
-# we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
-#
+
 import sys
-#import apt
-#import apt_pkg
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
-#import os
-#import time
 from optparse import OptionParser
-#import gettext
-#import subprocess
-
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
 from pathlib import Path
@@ -23,8 +13,6 @@ from pathlib import Path
 class Dialog(QWidget):
     def __init__(self, options=None):
         QWidget.__init__(self)
-        #uic.loadUi("designer/update_notifier.ui", self)
-        
         self.initUI()
         self.closeBtn.clicked.connect(self.call_reject)
         self.apt_client = client.AptClient()
@@ -115,7 +103,9 @@ class Dialog(QWidget):
 
     def upgrade_error(self, transaction, error_code, error_details):
         self.errors.append(error_details)
-        self.label.setText(error_details)
+       #cacheUpdate = False
+    #fullUpgrade = False
+     self.label.setText(error_details)
         self.closeBtn.setEnabled(True)
         print(error_details)
 
@@ -136,7 +126,7 @@ class Dialog(QWidget):
                                      self.update_progress_download)
             self.trans1.connect('error', self.upgrade_error)
             self.trans1.run()
-            print(self.trans1)
+            #print(self.trans1)
             
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully:" +
@@ -147,12 +137,10 @@ class Dialog(QWidget):
         self.upgrade()
         
     def upgrade(self):
-        #self.progressBar.setVisible(False)
         self.errors = []
         self.label.setText("Applying changes...")
-        print(self.apt_client)
-        
-        print(self.trans2)
+        #print(self.apt_client)
+        #print(self.trans2)
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed', 
@@ -201,9 +189,5 @@ if __name__ == "__main__":
                       help="Full upgrade same as dist-upgrade")
     (options, args) = parser.parse_args()
     
-    #cacheUpdate = False
-    #fullUpgrade = False
-    
     #run it
-    
     main(sys.argv, options)
