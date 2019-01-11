@@ -26,6 +26,7 @@ class Dialog(QWidget):
         self.label.setAlignment(Qt.AlignHCenter)
         self.upgradeBtn = QPushButton("Upgrade")
         self.closeBtn = QPushButton("Close")
+        text = ""
         
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -45,7 +46,12 @@ class Dialog(QWidget):
             text = "There are %s upgrades available and %s security updates available" % (self.upgrades, self.security_upgrades)
             
         if reboot_required:
-            text = text + "\nReboot is needed"
+            if text == "":
+                text = "Reboot is needed"
+                self.upgradeBtn.setVisible(False)
+            else:
+                text = text + "\nReboot is needed"
+                
         self.label.setText(text)
 
     def call_reject(self):
@@ -84,6 +90,6 @@ if __name__ == "__main__":
         reboot_required = True
     else:
         reboot_required = False
-        
+    
     if worker.upgrades > 0 or reboot_required:
         main(sys.argv, worker.upgrades, worker.security_upgrades, reboot_required)

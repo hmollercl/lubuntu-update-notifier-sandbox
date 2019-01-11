@@ -1,6 +1,7 @@
 # lubuntu-update-notifier
-Depend on update-notifier-common
-https://packages.ubuntu.com/disco/update-notifier-common
+Depend on:
+update-notifier-common ( https://packages.ubuntu.com/disco/update-notifier-common )
+aptdaemon
 
 notifier.py chek on demand if upgrades exist or if restart is needed.
 To check if upgrades exists calls update_worker.py which uses apt_check from update-notifier-common.
