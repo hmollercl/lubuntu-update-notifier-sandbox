@@ -69,6 +69,7 @@ class Dialog(QWidget):
         '''
         #subprocess.call(upg_path)
         subprocess.Popen(upg_path)
+        app.quit()
 
 class App(QApplication):
     def __init__(self, upgrades, security_upgrades, reboot_required, *args):
