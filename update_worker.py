@@ -27,8 +27,8 @@ class update_worker_t():
                     print ("PARSING OUTPUT FAILED")
                     return
             else:
-                print(self.m_runner.exitStatus())
-                print(self.m_runner.exitCode())
+                print("exit status: " + str (self.m_runner.exitStatus()))
+                print("error code: " + str(self.m_runner.exitCode()))
     
         else:
             print ("ALREADY RUNNING")
