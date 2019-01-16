@@ -57,7 +57,7 @@ class Dialog(QWidget):
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
-        self.label.setText("Applying changes...")
+        #self.label.setText("Applying changes...")
     
     def update_progress(self, transaction, progress):
         self.progressBar.setVisible(True)

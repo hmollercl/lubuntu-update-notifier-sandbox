@@ -1,10 +1,10 @@
-#!/usr/bin/python3
-# 
+#!/usr/bin/python3 
 
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import QIcon
+from optparse import OptionParser
 
 from pathlib import Path
 
@@ -12,10 +12,11 @@ from update_worker import update_worker_t
 import subprocess
 
 class Dialog(QWidget):
-    def __init__(self, upgrades, security_upgrades, reboot_required):
+    def __init__(self, upgrades, security_upgrades, reboot_required, upg_path):
         QWidget.__init__(self)
         self.upgrades = upgrades
         self.security_upgrades = security_upgrades
+        self.upg_path = upg_path
         
         self.initUI()
         self.upgradeBtn.clicked.connect(self.call_upgrade)
@@ -58,32 +59,35 @@ class Dialog(QWidget):
         app.quit()
     
     def call_upgrade(self):
-        upg_path= "./upgrader.py"
-        '''
-        process = QProcess()
-        process.startDetached()
-        out = process.start(upg_path)
-        print(out)
-        process.waitForStarted()
-        #app.quit()
-        '''
-        #subprocess.call(upg_path)
-        subprocess.Popen(upg_path)
+        #upg_path= "./upgrader.py"
+
+        process = subprocess.Popen(self.upg_path)
+        process.wait()
         app.quit()
 
 class App(QApplication):
-    def __init__(self, upgrades, security_upgrades, reboot_required, *args):
+    def __init__(self, upgrades, security_upgrades, reboot_required, upg_path, *args):
         QApplication.__init__(self, *args)
-        self.dialog = Dialog(upgrades, security_upgrades, reboot_required)
+        self.dialog = Dialog(upgrades, security_upgrades, reboot_required, upg_path)
         self.dialog.show()
 
-def main(args, upgrades, security_upgrades, reboot_required):
+def main(args, upgrades, security_upgrades, reboot_required, upg_path):
     global app
-    app = App(upgrades, security_upgrades, reboot_required, args)
+    app = App(upgrades, security_upgrades, reboot_required, upg_path, args)
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
     app.exec_()
 
 if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-u",
+                      "--upgrader-sw",
+                      dest="upg_path",
+                      help="Define software/app to open for upgrade",
+                      metavar="APP")
+    
+    
+    (options, args) = parser.parse_args()
+    
     worker = update_worker_t()
     worker.check_for_updates()
     
@@ -94,4 +98,4 @@ if __name__ == "__main__":
         reboot_required = False
     
     if worker.upgrades > 0 or reboot_required:
-        main(sys.argv, worker.upgrades, worker.security_upgrades, reboot_required)
+        main(sys.argv, worker.upgrades, worker.security_upgrades, reboot_required, options.upg_path)
