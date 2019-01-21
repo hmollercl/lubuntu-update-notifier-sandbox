@@ -1,0 +1,5 @@
+#!/bin/sh
+cd /usr/lib/update-notifier/lubuntu
+export DISPLAY=:0
+/usr/lib/update-notifier/lubuntu/notifier.py -u ./upgrader.py >> /home/hmoller/update_notifier.log 2>&1
+date >> /home/hmoller/update_notifier.log
