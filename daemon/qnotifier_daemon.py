@@ -1,39 +1,38 @@
 #!/usr/bin/python3
 # Depend on
 # update-notifier-common 
-https://packages.ubuntu.com/disco/update-notifier-common
+# https://packages.ubuntu.com/disco/update-notifier-common
 #
 from PyQt5.QtCore import QProcess
 
+from optparse import OptionParser
+import subprocess
+from pathlib import Path
+
 class update_worker_t():
     def __init__(self):
-        self.m_runner = QProcess()
         self.upgrades = 0
         self.security_upgrades = 0
         
     def check_for_updates(self):
-        if self.m_runner.state() == QProcess.NotRunning:
-            apt_check= "/usr/lib/update-notifier/apt-check"
-            #self.m_runner.finished.connect(self.runner_done)
-            self.m_runner.start(apt_check)
-            self.m_runner.waitForFinished()
-             
-            if (self.m_runner.exitStatus() == QProcess.NormalExit and 
-self.m_runner.exitCode() == 0):
-                result = self.m_runner.readAllStandardError()
-                parts = result.trimmed().split(";")
-                try:
-                    self.upgrades = int(parts[0])
-                    self.security_upgrades = int(parts[1])
-                except:
-                    print ("PARSING OUTPUT FAILED")
-                    return
-            else:
-                print("exit status: " + str (self.m_runner.exitStatus()))
-                print("error code: " + str(self.m_runner.exitCode()))
-    
+        apt_check = "/usr/lib/update-notifier/apt-check"
+        #output = subprocess.call(apt_check)
+        output = subprocess.check_output(apt_check, stderr=subprocess.STDOUT)
+        print(output)
+        print(subprocess.STDOUT)
+        if (subprocess.STDOUT <= 0):
+            parts = output.split(b";")
+            try:
+                self.upgrades = int(parts[0])
+                self.security_upgrades = int(parts[1])
+            except:
+                print ("PARSING OUTPUT FAILED")
+                return
         else:
-            print ("ALREADY RUNNING")
+            print(subprocess.STDOUT)
+    
+        #else:
+        #    print ("ALREADY RUNNING")
 
 if __name__ == "__main__":
     parser = OptionParser()
@@ -42,8 +41,11 @@ if __name__ == "__main__":
                       dest="upg_path",
                       help="Define software/app to open for upgrade",
                       metavar="APP")
-    
-    
+    parser.add_option("-n",
+                      "--notifier-gui",
+                      dest="not_path",
+                      help="Define notifier path",
+                      metavar="APP")
     (options, args) = parser.parse_args()
     
     worker = update_worker_t()
@@ -56,3 +58,4 @@ if __name__ == "__main__":
         reboot_required = False
     
     if worker.upgrades > 0 or reboot_required:
+        print("llamar gui" + str(worker.upgrades) + " "+ str(worker.security_upgrades))
