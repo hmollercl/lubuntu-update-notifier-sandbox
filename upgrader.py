@@ -4,7 +4,7 @@
 # we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
 #
 import sys
-from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView)
+from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
@@ -38,6 +38,7 @@ class Dialog(QWidget):
         self.label.setAlignment(Qt.AlignHCenter)
         self.closeBtn = QPushButton("Close")
         self.progressBar = QProgressBar()
+        self.textEdit = QTextEdit()
         
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -47,17 +48,18 @@ class Dialog(QWidget):
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
+        vbox.addWidget(self.textEdit)
         vbox.addLayout(hbox)
         
         self.setLayout(vbox) 
-        self.setGeometry(300, 300, 300, 150)
+        self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
+        self.textEdit.setVisible(False)
 
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
-        #self.label.setText("Applying changes...")
     
     def update_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
@@ -91,25 +93,29 @@ class Dialog(QWidget):
             self.label.setText(self.detailText + "\n" + self.downloadText)
     
     def upgrade_finish(self, transaction, exit_state):
-        text = "No more Upgrades Available"
+        text = "Upgrade finished"
         
         reboot_required_path = Path("/var/run/reboot-required")
         if reboot_required_path.exists():
             text = text + "\n" + "Restart required"
         self.progressBar.setVisible(False)
         
-        for error in self.errors:
-            text = text + "\n" + error
+        if(len(self.errors)>0):
+            text = text + " with some errors:"
         
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
-        self.errors.append(error_details)
-        self.label.setText(error_details)
+        self.errors.append("Eror Code: " + str(error_code))
+        self.errors.append("Error Detail: " + error_details)
+        for error in self.errors:
+            self.textEdit.append(error)
+        self.textEdit.setVisible(True)
         self.closeBtn.setEnabled(True)
-        print(error_details)
+        print("ECode: " + str(error_code) + "\n")
+        print("EDetail: " + error_details + "\n")
 
     def upgrade_cancellable_changed(self, transaction, cancellable):
         self.closeBtn.setEnabled(cancellable)
@@ -141,8 +147,6 @@ class Dialog(QWidget):
     def upgrade(self):
         self.errors = []
         self.label.setText("Applying changes...")
-        #print(self.apt_client)
-        #print(self.trans2)
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed', 

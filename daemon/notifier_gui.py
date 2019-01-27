@@ -8,7 +8,6 @@ from optparse import OptionParser
 
 from pathlib import Path
 
-from update_worker import update_worker_t
 import subprocess
 
 class Dialog(QWidget):
@@ -44,7 +43,7 @@ class Dialog(QWidget):
         self.setWindowTitle("Update Notifier")
         
         if self.upgrades > 0:
-            text = "There are %s upgrades available and %s security updates available" % (self.upgrades, self.security_upgrades)
+            text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
             
         if reboot_required:
             if text == "":
@@ -79,17 +78,23 @@ def main(args, upgrades, security_upgrades, reboot_required, upg_path):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("-u",
+    parser.add_option("-p",
                       "--upgrader-sw",
                       dest="upg_path",
                       help="Define software/app to open for upgrade",
                       metavar="APP")
-    
+    parser.add_option("-u",
+                      "--upgrades",
+                      dest="upgrades",
+                      help="How many upgrades are available",
+                      metavar="APP")
+    parser.add_option("-s",
+                      "--securrity-upg",
+                      dest="security_upgrades",
+                      help="How many security upgrades are available",
+                      metavar="APP")
     
     (options, args) = parser.parse_args()
-    
-    worker = update_worker_t()
-    worker.check_for_updates()
     
     reboot_required_path = Path("/var/run/reboot-required")
     if reboot_required_path.exists():
@@ -97,5 +102,5 @@ if __name__ == "__main__":
     else:
         reboot_required = False
     
-    if worker.upgrades > 0 or reboot_required:
-        main(sys.argv, worker.upgrades, worker.security_upgrades, reboot_required, options.upg_path)
+    if int(options.upgrades) > 0 or reboot_required:
+        main(sys.argv, int(options.upgrades), int(options.security_upgrades), reboot_required, options.upg_path)

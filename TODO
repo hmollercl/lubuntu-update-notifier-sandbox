@@ -1,4 +1,5 @@
 call from notifier o upgrader
 currently the call from notifier to upgrader is through subprocess.
-This seems "clumsy", maybe use upgrader as a module?
-determine best way to "cron" it. Is cron the better way?
+This seems "clumsy", maybe use upgrader as a module? -> takes much mem
+
+determine best way to "cron" it. Is cron the better way? -> script
