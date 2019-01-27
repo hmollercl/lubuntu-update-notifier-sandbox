@@ -1,4 +1,20 @@
 # lubuntu-update-notifier
+Installation Instruction:
+Install packages (via apt or similar):
+- update-notifier-common
+- aptdaemon
+This files are the ones that need to be downloaded and need to be copied in the same directory, the files are:
+-notifier.py
+-update_worker.py
+-upgrader.py
+-upNot.sh
+
+run upNot.sh to check every hour if there are updates. It's recommended to add an entry in autostart. By going to:
+Preferences -> LXQt configuration -> Sesion confuiguration
+There you got to autosart, pres add, in Name put something like "Update Notifier" in Comand search for upNot.sh done.
+
+---------------------------------------------------------------------------------------------------------------------
+
 Depend on:
 update-notifier-common ( https://packages.ubuntu.com/disco/update-notifier-common )
 aptdaemon
