@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
@@ -18,47 +18,47 @@ class Dialog(QWidget):
         self.upgrades = upgrades
         self.security_upgrades = security_upgrades
         self.upg_path = upg_path
-        
+
         self.initUI()
         self.upgradeBtn.clicked.connect(self.call_upgrade)
         self.closeBtn.clicked.connect(self.call_reject)
-        
+
     def initUI(self):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignHCenter)
         self.upgradeBtn = QPushButton("Upgrade")
         self.closeBtn = QPushButton("Close")
         text = ""
-        
+
         hbox=QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(self.upgradeBtn)
         hbox.addWidget(self.closeBtn)
         hbox.addStretch(1)
-        
+
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
         vbox.addLayout(hbox)
-        
-        self.setLayout(vbox) 
+
+        self.setLayout(vbox)
         self.setGeometry(300, 300, 300, 150)
         self.setWindowTitle("Update Notifier")
-        
+
         if self.upgrades > 0:
             text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
-            
+
         if reboot_required:
             if text == "":
                 text = "Reboot is needed"
                 self.upgradeBtn.setVisible(False)
             else:
                 text = text + "\nReboot is needed"
-                
+
         self.label.setText(text)
 
     def call_reject(self):
         app.quit()
-    
+
     def call_upgrade(self):
         self.label.setText("Upgrading....")
         #TODO maybe open another thread so notifier won't freeze
@@ -87,19 +87,21 @@ if __name__ == "__main__":
                       dest="upg_path",
                       help="Define software/app to open for upgrade",
                       metavar="APP")
-    
-    
+
+
     (options, args) = parser.parse_args()
-    
+
     worker = update_worker_t()
     worker.check_for_updates()
-    
+
     reboot_required_path = Path("/var/run/reboot-required")
     if reboot_required_path.exists():
         reboot_required = True
     else:
         reboot_required = False
-    
+
     if worker.upgrades > 0 or reboot_required:
-        main(sys.argv, worker.upgrades, worker.security_upgrades, 
+        main(sys.argv, worker.upgrades, worker.security_upgrades,
         		reboot_required, options.upg_path)
+
+    sys.exit(0)
