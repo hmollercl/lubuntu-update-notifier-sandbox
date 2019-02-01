@@ -16,42 +16,42 @@ from pathlib import Path
 class Dialog(QWidget):
     def __init__(self, options=None):
         QWidget.__init__(self)
-        
+
         self.initUI()
         self.closeBtn.clicked.connect(self.call_reject)
         self.apt_client = client.AptClient()
         self.downloadText = ""
-        
+
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
         else:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=True)
-        
+
         if options.cacheUpdate:
             self.trans1 = self.apt_client.update_cache()
             self.update_cache()
         else:
             self.upgrade()
-        
+
     def initUI(self):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignHCenter)
         self.closeBtn = QPushButton("Close")
         self.progressBar = QProgressBar()
         self.textEdit = QTextEdit()
-        
+
         hbox=QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(self.closeBtn)
         hbox.addStretch(1)
-        
+
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
         vbox.addWidget(self.textEdit)
         vbox.addLayout(hbox)
-        
-        self.setLayout(vbox) 
+
+        self.setLayout(vbox)
         self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
@@ -60,49 +60,49 @@ class Dialog(QWidget):
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
-    
+
     def update_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
         self.progressBar.setValue(progress)
         self.label.setText("Updating cache...")
 
-    def update_progress_download(self, transaction, uri, status, short_desc, 
+    def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.label.setText(self.downloadText)
-    
-    def upgrade_progress_download(self, transaction, uri, status, short_desc, 
+
+    def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.downloadText = "Downloading " + short_desc
         self.label.setText(self.detailText + "\n" + self.downloadText)
-        
+
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
             self.label.setText(self.detailText + "\n" + self.downloadText)
-    
-    
+
+
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
             self.label.setText(self.detailText + "\n" + self.downloadText)
-    
+
     def upgrade_finish(self, transaction, exit_state):
         text = "Upgrade finished"
-        
+
         reboot_required_path = Path("/var/run/reboot-required")
         if reboot_required_path.exists():
             text = text + "\n" + "Restart required"
         self.progressBar.setVisible(False)
-        
+
         if(len(self.errors)>0):
             text = text + " with some errors:"
-        
+
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
@@ -126,43 +126,46 @@ class Dialog(QWidget):
         self.label.setText("Updating cache...")
         try:
             self.trans1.connect('finished', self.update_finish)
-            
+
             self.trans1.connect('progress-changed', self.update_progress)
-            self.trans1.connect('progress-details-changed', 
+            self.trans1.connect('progress-details-changed',
                                      self.update_progress_detail)
-            self.trans1.connect('progress-download-changed', 
+            self.trans1.connect('progress-download-changed',
                                      self.update_progress_download)
             self.trans1.connect('error', self.upgrade_error)
             self.trans1.run()
             #print(self.trans1)
-            
+
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully:" +
                   "{}".format(e))
-    
+
     def update_finish(self, transaction, exit_state):
         self.label.setText("Update Cache Finished")
         self.upgrade()
-        
+
     def upgrade(self):
         self.errors = []
         self.label.setText("Applying changes...")
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
-            self.trans2.connect('cancellable-changed', 
+            self.trans2.connect('cancellable-changed',
                                      self.upgrade_cancellable_changed)
-            self.trans2.connect('progress-details-changed', 
+            self.trans2.connect('progress-details-changed',
                                      self.upgrade_progress_detail)
-            self.trans2.connect('progress-download-changed', 
+            self.trans2.connect('progress-download-changed',
                                      self.upgrade_progress_download)
             self.trans2.connect('finished', self.upgrade_finish)
             self.trans2.connect('error', self.upgrade_error)
+            #TODO to be tested
+            self.trans2.set_debconf_frontend('kde')
+            #self.trans2.set_debconf_frontend('gnome')
             self.trans2.run()
-            
+
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully:" +
                   "{}".format(e))
-        
+
     def call_reject(self):
         app.quit()
 
@@ -194,6 +197,6 @@ if __name__ == "__main__":
                       dest="fullUpgrade",
                       help="Full upgrade same as dist-upgrade")
     (options, args) = parser.parse_args()
-    
+
     #run it
     main(sys.argv, options)
