@@ -62,7 +62,10 @@ class Dialog(QWidget):
     def call_upgrade(self):
         self.label.setText("Upgrading....")
         #TODO maybe open another thread so notifier won't freeze
-        process = subprocess.Popen(self.upg_path)
+        cmd = ['lxqt-sudo', self.upg_path]
+        #process = subprocess.Popen(self.upg_path)
+        #process = subprocess.Popen(cmd)
+        process = subprocess.Popen(cmd, shell=True)
         process.wait()
         app.quit()
 
