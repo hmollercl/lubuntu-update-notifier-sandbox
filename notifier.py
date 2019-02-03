@@ -65,7 +65,8 @@ class Dialog(QWidget):
         cmd = ['lxqt-sudo', self.upg_path]
         #process = subprocess.Popen(self.upg_path)
         #process = subprocess.Popen(cmd)
-        process = subprocess.Popen(cmd, shell=True)
+#        process = subprocess.Popen(cmd, shell=True)
+        process = subprocess.Popen(cmd)
         process.wait()
         app.quit()
 
