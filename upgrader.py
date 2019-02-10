@@ -68,9 +68,10 @@ class Dialog(QWidget):
 
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.downloadText = "Fetching\n" + short_desc
+        #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.label.setText(self.downloadText)
+        self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
