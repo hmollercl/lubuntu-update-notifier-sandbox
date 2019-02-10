@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-# based on apt_check.py
-# or
-# we could use update-notifier-common https://packages.ubuntu.com/disco/update-notifier-common
-#
+# deppend on
+# -aptdaemon 
+# -debconf-kde-helper
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit)
 from PyQt5 import uic
@@ -55,7 +54,8 @@ class Dialog(QWidget):
         self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
-        self.textEdit.setVisible(False)
+        self.textEdit.setReadOnly(True)
+#        self.textEdit.setVisible(False)
 
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
@@ -74,8 +74,9 @@ class Dialog(QWidget):
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.downloadText = "Downloading " + short_desc
-        self.label.setText(self.detailText + "\n" + self.downloadText)
+        #self.downloadText = "Downloading " + short_desc
+        #self.label.setText(self.detailText + "\n" + self.downloadText)
+        self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
@@ -89,8 +90,10 @@ class Dialog(QWidget):
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
-            self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
-            self.label.setText(self.detailText + "\n" + self.downloadText)
+            if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
+                self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
+                self.label.setText(self.detailText + "\n" + self.downloadText)
+                self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
     def upgrade_finish(self, transaction, exit_state):
         text = "Upgrade finished"
@@ -108,8 +111,8 @@ class Dialog(QWidget):
         self.closeBtn.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
-        self.errors.append("Eror Code: " + str(error_code))
-        self.errors.append("Error Detail: " + error_details)
+        self.errors.append("Eror Code: " + str(error_code) + "\n")
+        self.errors.append("Error Detail: " + error_details + "\n")
         for error in self.errors:
             self.textEdit.append(error)
         self.textEdit.setVisible(True)
@@ -159,7 +162,19 @@ class Dialog(QWidget):
             self.trans2.connect('error', self.upgrade_error)
             #TODO to be tested
             self.trans2.set_debconf_frontend('kde')
-            #self.trans2.set_debconf_frontend('gnome')
+            '''
+            Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
+Unable to execute debconf-kde-helper - is debconf-kde-helper installed?Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
+Unable to execute debconf-kde-helper - is debconf-kde-helper installed?'''
+            "self.trans2.set_debconf_frontend('gnome')
+            '''
+            debconf: no se pudo inicializar la interfaz: Gnome
+debconf: (Can't locate Gtk3.pm in @INC (you may need to install the Gtk3 module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.28.1 /usr/local/share/perl/5.28.1 /usr/lib/x86_64-linux-gnu/perl5/5.28 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.28 /usr/share/perl/5.28 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Gnome.pm line 151.)
+debconf: probando ahora la interfaz: Dialog
+debconf: no se pudo inicializar la interfaz: Dialog
+debconf: (La interfaz «dialog» no funcionará en un terminal tonto, un búfer de intérprete de órdenes de emacs, o sin una terminal controladora.)
+debconf: probando ahora la interfaz: Readline
+'''
             self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:

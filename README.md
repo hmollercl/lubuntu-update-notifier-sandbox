@@ -17,8 +17,9 @@ There you got to autosart, pres add, in Name put something like "Update Notifier
 ---------------------------------------------------------------------------------------------------------------------
 
 Depend on:
-update-notifier-common ( https://packages.ubuntu.com/disco/update-notifier-common )
-aptdaemon
+- update-notifier-common ( https://packages.ubuntu.com/disco/update-notifier-common )
+- aptdaemon
+- debconf-kde-helper
 
 notifier.py chek on demand if upgrades exist or if restart is needed.
 To check if upgrades exists it calls update_worker.py which uses apt_check from update-notifier-common.
