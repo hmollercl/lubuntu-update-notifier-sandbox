@@ -55,7 +55,7 @@ class Dialog(QWidget):
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
         self.textEdit.setReadOnly(True)
-#        self.textEdit.setVisible(False)
+        self.textEdit.setVisible(False)
 
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
@@ -68,6 +68,7 @@ class Dialog(QWidget):
 
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
+        self.textEdit.setVisible(False)
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.label.setText(self.downloadText)
@@ -75,12 +76,14 @@ class Dialog(QWidget):
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
+        self.textEdit.setVisible(False)
         #self.downloadText = "Downloading " + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
+        self.textEdit.setVisible(False)
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
@@ -90,6 +93,7 @@ class Dialog(QWidget):
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+        self.textEdit.setVisible(False)
         if total_items > 0:
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
