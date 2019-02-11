@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # deppend on
-# -aptdaemon 
+# -aptdaemon
 # -debconf-kde-helper
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit)
@@ -71,7 +71,7 @@ class Dialog(QWidget):
         self.textEdit.setVisible(True)
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
-        self.label.setText(self.downloadText)
+        #self.label.setText(self.downloadText)
         self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
