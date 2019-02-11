@@ -68,7 +68,7 @@ class Dialog(QWidget):
 
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.textEdit.setVisible(False)
+        self.textEdit.setVisible(True)
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.label.setText(self.downloadText)
@@ -76,14 +76,14 @@ class Dialog(QWidget):
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.textEdit.setVisible(False)
+        self.textEdit.setVisible(True)
         #self.downloadText = "Downloading " + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
-        self.textEdit.setVisible(False)
+        self.textEdit.setVisible(True)
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
@@ -93,7 +93,7 @@ class Dialog(QWidget):
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
-        self.textEdit.setVisible(False)
+        self.textEdit.setVisible(True)
         if total_items > 0:
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
@@ -116,6 +116,7 @@ class Dialog(QWidget):
         self.closeBtn.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
+        self.textEdit.setVisible(True)
         self.errors.append("Eror Code: " + str(error_code) + "\n")
         self.errors.append("Error Detail: " + error_details + "\n")
         for error in self.errors:
