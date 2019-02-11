@@ -20,6 +20,7 @@ class Dialog(QWidget):
         self.closeBtn.clicked.connect(self.call_reject)
         self.apt_client = client.AptClient()
         self.downloadText = ""
+        self.detailText = ""
 
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
