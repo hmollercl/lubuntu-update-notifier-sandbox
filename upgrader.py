@@ -84,9 +84,9 @@ class Dialog(QWidget):
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
-        self.textEdit.setVisible(True)
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
+            self.textEdit.setVisible(True)
             self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
             self.label.setText(self.detailText + "\n" + self.downloadText)
 
@@ -94,8 +94,8 @@ class Dialog(QWidget):
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
-        self.textEdit.setVisible(True)
         if total_items > 0:
+            self.textEdit.setVisible(True)
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
