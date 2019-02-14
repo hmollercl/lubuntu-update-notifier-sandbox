@@ -1,5 +1,9 @@
-call from notifier o upgrader
-currently the call from notifier to upgrader is through subprocess.
-This seems "clumsy", maybe use upgrader as a module? -> takes much mem
+-if notifier is called w/o upgrade program, don't show upgrade button
 
-determine best way to "cron" it. Is cron the better way? -> script
+-call from notifier to upgrader
+currently the call from notifier to upgrader is through subprocess.
+This seems "clumsy", maybe use upgrader as a module? -> takes much memory
+subprocess gives the option to call another upgrade programm.
+maybe start in another thread?
+
+-move to qapt (libqapt) instead of aptdaemon for better qt integration.
