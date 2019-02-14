@@ -1,5 +1,3 @@
--if notifier is called w/o upgrade program, don't show upgrade button
-
 -call from notifier to upgrader
 currently the call from notifier to upgrader is through subprocess.
 This seems "clumsy", maybe use upgrader as a module? -> takes much memory
