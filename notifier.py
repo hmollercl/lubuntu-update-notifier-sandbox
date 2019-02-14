@@ -40,6 +40,9 @@ class Dialog(QWidget):
         vbox.addWidget(self.label)
         vbox.addLayout(hbox)
 
+        if self.upg_path == None:
+            self.upgradeBtn.setVisible(False)
+
         self.setLayout(vbox)
         self.setGeometry(300, 300, 300, 150)
         self.setWindowTitle("Update Notifier")
