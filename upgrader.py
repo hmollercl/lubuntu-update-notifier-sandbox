@@ -3,7 +3,8 @@
 # -aptdaemon
 # -debconf-kde-helper
 import sys
-from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit)
+import os
+from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit, QMessageBox)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QStandardItemModel, QIcon)
@@ -202,7 +203,15 @@ def main(args, options):
     global app
     app = App(options, args)
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
-    app.exec_()
+
+    # Check for root permissions
+    if os.geteuid() != 0:
+        text = "Please run this software with administrative rights. To do so, run this program with lxqt-sudo."
+        title = "Need administrative powers"
+        msgbox = QMessageBox.critical(None, title, text)
+        sys.exit(1)
+    else:
+        app.exec_()
 
 
 if __name__ == "__main__":
