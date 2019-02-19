@@ -16,7 +16,7 @@ while true;
              j=`expr $j + 1`
         done
         IFS=$oldIFS
-        #cd "$( cd "$( dirname "$0" )" && pwd )"
+        cd "$( cd "$( dirname "$0" )" && pwd )"
         #./notifier.py -p ./upgrader.py >> ~/update_notifier.log 2>&1
         #date >> ~/update_notifier.log
         ./notifier_gui.py -u $UPG -s $SEC -p terminal
