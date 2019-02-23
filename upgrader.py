@@ -22,6 +22,7 @@ class Dialog(QWidget):
         self.apt_client = client.AptClient()
         self.downloadText = ""
         self.detailText = ""
+        self.old_short_desc=""
 
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
@@ -74,7 +75,16 @@ class Dialog(QWidget):
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         #self.label.setText(self.downloadText)
-        self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+        #TODO
+        #if short_desc == old_short_desc update last line instead of append.
+        #change QTextEdit by QPlainTextEdit
+        if self.old_short_desc == short_desc:
+            #self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.insertPlainText(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+        else:
+            #self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.insertPlainText(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+            self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
@@ -156,7 +166,7 @@ class Dialog(QWidget):
         self.upgrade()
 
     def upgrade(self):
-        #print(self.trans2.packages)
+        print(self.trans2.packages)
         self.errors = []
         self.label.setText("Applying changes...")
         try:
