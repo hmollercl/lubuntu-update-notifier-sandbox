@@ -4,10 +4,12 @@
 # -debconf-kde-helper
 import sys
 import os
-from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView, QTextEdit, QMessageBox)
+from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
+							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
+							 QTextEdit, QMessageBox)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import (QStandardItemModel, QIcon)
+from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor)
 from optparse import OptionParser
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
@@ -75,15 +77,16 @@ class Dialog(QWidget):
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         #self.label.setText(self.downloadText)
-        #TODO
-        #if short_desc == old_short_desc update last line instead of append.
-        #change QTextEdit by QPlainTextEdit
         if self.old_short_desc == short_desc:
-            #self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
-            self.textEdit.insertPlainText(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+            cursor = self.textEdit.textCursor()
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            cursor.select(QTextCursor.LineUnderCursor)
+            cursor.removeSelectedText()
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         else:
-            #self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
-            self.textEdit.insertPlainText(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
@@ -91,15 +94,27 @@ class Dialog(QWidget):
         self.textEdit.setVisible(True)
         #self.downloadText = "Downloading " + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
-        self.textEdit.append(status + " " + short_desc + " " + str(current_size) + "/" + str(total_size) + " " + msg)
+        if self.old_short_desc == short_desc:
+            cursor = self.textEdit.textCursor()
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            cursor.select(QTextCursor.LineUnderCursor)
+            cursor.removeSelectedText()
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+        else:
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.textEdit.setVisible(True)
-            self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
-            self.label.setText(self.detailText + "\n" + self.downloadText)
+            if self.detailText != "Fetching " + str(current_items) + " of " + str(total_items):
+                self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
+                self.label.setText(self.detailText + "\n" + self.downloadText)
+                self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
