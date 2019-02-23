@@ -19,6 +19,7 @@ while true;
         cd "$( cd "$( dirname "$0" )" && pwd )"
         #./notifier.py -p ./upgrader.py >> ~/update_notifier.log 2>&1
         #date >> ~/update_notifier.log
-        ./notifier_gui.py -u $UPG -s $SEC -p terminal
+        #./notifier_gui.py -u $UPG -s $SEC -p terminal
+        ./notifier_gui.py -u $UPG -s $SEC -p ./upgrader.py
         sleep 3600
 done;
