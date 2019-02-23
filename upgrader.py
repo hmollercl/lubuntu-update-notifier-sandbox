@@ -25,6 +25,7 @@ class Dialog(QWidget):
         self.downloadText = ""
         self.detailText = ""
         self.old_short_desc=""
+        self.errors = []
 
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
@@ -158,7 +159,6 @@ class Dialog(QWidget):
 
     def update_cache(self):
         self.closeBtn.setVisible(False)
-        self.errors = []
         self.label.setText("Updating cache...")
         try:
             self.trans1.connect('finished', self.update_finish)
@@ -182,7 +182,6 @@ class Dialog(QWidget):
 
     def upgrade(self):
         print(self.trans2.packages)
-        self.errors = []
         self.label.setText("Applying changes...")
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
