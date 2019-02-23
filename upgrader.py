@@ -156,6 +156,7 @@ class Dialog(QWidget):
         self.upgrade()
 
     def upgrade(self):
+        #print(self.trans2.packages)
         self.errors = []
         self.label.setText("Applying changes...")
         try:
@@ -168,7 +169,6 @@ class Dialog(QWidget):
                                      self.upgrade_progress_download)
             self.trans2.connect('finished', self.upgrade_finish)
             self.trans2.connect('error', self.upgrade_error)
-            #TODO to be tested
             self.trans2.set_debconf_frontend('kde')
             '''
             Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.

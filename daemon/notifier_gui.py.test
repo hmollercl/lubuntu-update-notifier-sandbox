@@ -2,7 +2,7 @@
 
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
-							QHBoxLayout, QVBoxLayout)
+							QHBoxLayout, QVBoxLayout, QTextEdit)
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import QIcon
 from optparse import OptionParser
@@ -25,9 +25,11 @@ class Dialog(QWidget):
     def initUI(self):
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignHCenter)
+        self.textEdit = QTextEdit()
         self.upgradeBtn = QPushButton("Upgrade")
         self.closeBtn = QPushButton("Close")
         text = ""
+        detailText = ""
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -37,7 +39,11 @@ class Dialog(QWidget):
 
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
+        vbox.addWidget(self.textEdit)
         vbox.addLayout(hbox)
+
+        self.textEdit.setReadOnly(True)
+        self.textEdit.setVisible(False)
 
         if self.upg_path == None:
             self.upgradeBtn.setVisible(False)
@@ -66,14 +72,21 @@ class Dialog(QWidget):
         #TODO maybe open another thread so notifier won't freeze
         if self.upg_path == "terminal":
             #cmd = ['qterminal', '-e', 'sudo', 'apt', 'dist-upgrade']
-            cmd = ['qterminal', '-e', './upg.sh']
+            #cmd = ['qterminal', '-e', './upg.sh']
+            cmd = ['sudo', 'apt', 'upgrade']
+            self.upgradeBtn.setVisible(False)
+            self.upgradeBtn.setEnabled(False)
+            process = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE)
+            out, err = process.communicate()
+            #print(out)
+            self.textEdit.setVisible(True)
+            detailText = out.decode('utf-8')
+            self.textEdit.append(detailText)
         else:
             cmd = ['lxqt-sudo', self.upg_path]
+            process = subprocess.Popen(cmd)
         #process = subprocess.Popen(self.upg_path)
         #process = subprocess.Popen(cmd, shell=True)
-        self.upgradeBtn.setVisible(False)
-        self.upgradeBtn.setEnabled(False)
-        process = subprocess.Popen(cmd)
         process.wait()
 
         if self.upg_path == "terminal":
