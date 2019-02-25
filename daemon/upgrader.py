@@ -4,6 +4,10 @@
 # -debconf-kde-helper
 import sys
 import os
+
+import pty
+import subprocess
+
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
 							 QTextEdit, QMessageBox)
@@ -194,9 +198,20 @@ class Dialog(QWidget):
         self.label.setText("Update Cache Finished")
         self.upgrade()
 
+    def status_details_changed(self, trans, details):
+        print(details)
+
+    def status_changed(self, trans, status):
+        print(status)
+
     def upgrade(self):
         #print(self.trans2.packages)
+        shell = os.environ['SHELL']
+        master, slave = pty.openpty()
+
         self.label.setText("Applying changes...")
+        pty.spawn(shell)
+
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed',
@@ -207,25 +222,29 @@ class Dialog(QWidget):
                                      self.upgrade_progress_download)
             self.trans2.connect('finished', self.upgrade_finish)
             self.trans2.connect('error', self.upgrade_error)
-        '''
-        #TODO implement this
-        trans.connect("status-details-changed", self._on_details_changed,
-                      self.label_details)
-        trans.connect("status-changed", self._on_status_changed,
-                      self.label_details, expander)
-        trans.connect("medium-required", self._on_medium_required)
-        trans.connect("config-file-conflict", self._on_config_file_conflict)
+            #TODO check if works
 
+            '''proc = subprocess.Popen([shell],
+                            stdin=slave,
+                            #stdout=subprocess.PIPE,
+                            stdout=slave,
+                            #stderr=subprocess.PIPE
+                            stderr=slave)'''
+            self.trans2.set_terminal(os.ttyname(slave))
+
+            #TODO implement this
+            #self.trans2.connect("status-details-changed", self.status_details_changed)
+            #self.trans2.connect("status-changed", self.status_changed)
+            #self.trans2.connect("medium-required", self.medium_required)
+            #self.trans2.connect("config-file-conflict", self.config_file_conflict)
+
+            '''
         from aptdaemon.gtk3widgets import AptDetailsExpander
         expander = AptDetailsExpander(trans)
-
-        self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
-
-
         #TODO remove_obsoleted_depends
         # remove_obsoleted_depends
         # to see if that gives more info
-        '''
+            '''
             self.trans2.set_debconf_frontend('kde')
             '''
             Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
@@ -266,7 +285,7 @@ def main(args, options):
         text = "Please run this software with administrative rights. To do so, run this program with lxqt-sudo."
         title = "Need administrative powers"
         msgbox = QMessageBox.critical(None, title, text)
-        sys.exit(1)
+        #sys.exit(1)
     else:
         app.exec_()
 
