@@ -62,6 +62,14 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         self.textEdit.setReadOnly(True)
         self.textEdit.setVisible(False)
+        self.center()
+
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
@@ -120,7 +128,10 @@ class Dialog(QWidget):
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
-        #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
+        self.detailText = "Upgrading..."
+        self.label.setText(self.detailText)
+        #self.textEdit.append(str(current_items) + " " + " " + str(total_items) + " " + str(current_bytes) + " " + str(total_bytes) + " " + str(current_cps) + " " + str(eta))
+        print(str(current_items) + " " + str(total_items) + " " + str(current_bytes) + " " + str(total_bytes) + " " + str(current_cps) + " " + str(eta))
         if total_items > 0:
             self.textEdit.setVisible(True)
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
@@ -196,6 +207,25 @@ class Dialog(QWidget):
                                      self.upgrade_progress_download)
             self.trans2.connect('finished', self.upgrade_finish)
             self.trans2.connect('error', self.upgrade_error)
+        '''
+        #TODO implement this
+        trans.connect("status-details-changed", self._on_details_changed,
+                      self.label_details)
+        trans.connect("status-changed", self._on_status_changed,
+                      self.label_details, expander)
+        trans.connect("medium-required", self._on_medium_required)
+        trans.connect("config-file-conflict", self._on_config_file_conflict)
+
+        from aptdaemon.gtk3widgets import AptDetailsExpander
+        expander = AptDetailsExpander(trans)
+
+        self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
+
+
+        #TODO remove_obsoleted_depends
+        # remove_obsoleted_depends
+        # to see if that gives more info
+        '''
             self.trans2.set_debconf_frontend('kde')
             '''
             Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.

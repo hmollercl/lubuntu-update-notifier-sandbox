@@ -43,8 +43,9 @@ class Dialog(QWidget):
             self.upgradeBtn.setVisible(False)
 
         self.setLayout(vbox)
-        self.setGeometry(300, 300, 300, 150)
+        self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle("Update Notifier")
+        self.center()
 
         if self.upgrades > 0:
             text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
@@ -57,6 +58,13 @@ class Dialog(QWidget):
                 text = text + "\nReboot is needed"
 
         self.label.setText(text)
+
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
     def call_reject(self):
         app.quit()
