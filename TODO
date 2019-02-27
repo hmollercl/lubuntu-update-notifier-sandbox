@@ -1,7 +1,10 @@
--call from notifier to upgrader
+- Call from notifier to upgrader
 currently the call from notifier to upgrader is through subprocess.
 This seems "clumsy", maybe use upgrader as a module? -> takes much memory
 subprocess gives the option to call another upgrade programm.
 maybe start in another thread?
 
--move to qapt (libqapt) instead of aptdaemon for better qt integration.
+- Implement aptdaemon.client.transaction.set_terminal()
+- Implement aptdaemon.client.transaction.remove_obsoleted_depends
+
+- Move to libqapt (qt) instead of aptdaemon for better qt integration.

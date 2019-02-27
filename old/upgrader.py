@@ -4,10 +4,6 @@
 # -debconf-kde-helper
 import sys
 import os
-
-import pty
-import subprocess
-
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
 							 QTextEdit, QMessageBox)
@@ -17,12 +13,6 @@ from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor)
 from optparse import OptionParser
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
-from aptdaemon.enums import (EXIT_SUCCESS,
-                             EXIT_FAILED,
-                             STATUS_COMMITTING,
-                             get_error_description_from_enum,
-                             get_error_string_from_enum,
-                             get_status_string_from_enum)
 from pathlib import Path
 
 class Dialog(QWidget):
@@ -36,14 +26,6 @@ class Dialog(QWidget):
         self.detailText = ""
         self.old_short_desc=""
         self.errors = []
-
-        self.master, self.slave = pty.openpty()
-        '''proc = subprocess.Popen(['qterminal'],
-                            stdin=self.slave,
-                            #stdout=subprocess.PIPE,
-                            stdout=self.slave,
-                            #stderr=subprocess.PIPE
-                            stderr=self.slave)'''
 
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
@@ -80,14 +62,6 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         self.textEdit.setReadOnly(True)
         self.textEdit.setVisible(False)
-        self.center()
-
-    def center(self):
-        frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def upgrade_progress(self, transaction, progress):
         self.progressBar.setVisible(True)
@@ -119,6 +93,8 @@ class Dialog(QWidget):
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.textEdit.setVisible(True)
+        #self.downloadText = "Downloading " + short_desc
+        #self.label.setText(self.detailText + "\n" + self.downloadText)
         if self.old_short_desc == short_desc:
             cursor = self.textEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
@@ -144,8 +120,7 @@ class Dialog(QWidget):
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
-        #self.detailText = "Upgrading..."
-        #self.label.setText(self.detailText)
+        #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.textEdit.setVisible(True)
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
@@ -154,10 +129,6 @@ class Dialog(QWidget):
                 #self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
     def upgrade_finish(self, transaction, exit_state):
-        if exit_state == EXIT_FAILED:
-            error_string = get_error_string_from_enum(transaction.error.code)
-            error_desc = get_error_description_from_enum(transaction.error.code)
-
         text = "Upgrade finished"
 
         reboot_required_path = Path("/var/run/reboot-required")
@@ -170,8 +141,6 @@ class Dialog(QWidget):
             self.textEdit.append("Error Resume:\n")
             for error in self.errors:
                 self.textEdit.insertPlainText(error + "\n")
-                self.textEdit.insertPlainText(error_string + "\n")
-                self.textEdit.insertPlainText(error_desc + "\n")
 
         self.label.setText(text)
         self.closeBtn.setVisible(True)
@@ -193,7 +162,7 @@ class Dialog(QWidget):
 
     def update_cache(self):
         self.closeBtn.setVisible(False)
-        #self.label.setText("Updating cache...")
+        self.label.setText("Updating cache...")
         try:
             self.trans1.connect('finished', self.update_finish)
 
@@ -203,12 +172,6 @@ class Dialog(QWidget):
             self.trans1.connect('progress-download-changed',
                                      self.update_progress_download)
             self.trans1.connect('error', self.upgrade_error)
-            #status-details-changed is not needed, progress_download already hast this info when downloading
-            #self.trans1.connect("status-details-changed", self.status_details_changed)
-            self.trans1.connect("status-changed", self.status_changed)
-            #TODO make a terminal work to see more info
-            self.trans1.set_terminal(os.ttyname(self.slave))
-
             self.trans1.run()
             #print(self.trans1)
 
@@ -218,28 +181,11 @@ class Dialog(QWidget):
 
     def update_finish(self, transaction, exit_state):
         self.label.setText("Update Cache Finished")
-        if exit_state == EXIT_FAILED:
-            error_string = get_error_string_from_enum(transaction.error.code)
-            error_desc = get_error_description_from_enum(transaction.error.code)
-            self.textEdit.insertPlainText(error_string + "\n")
-            self.textEdit.insertPlainText(error_desc + "\n")
-
         self.upgrade()
-
-    def status_changed(self, transaction, status):
-        #self.textEdit.append("Status:" + status)
-        self.label.setText("Status:" + get_status_string_from_enum(status))
-        print("Status:" + get_status_string_from_enum(status) +"\n")
-
-    def status_details_changed(self, transaction, details):
-        self.textEdit.append(details)
-        #print("PTY:" + str(self.slave))
-        self.label.setText(details)
-        print("Status Details:" + details + "\n")
 
     def upgrade(self):
         #print(self.trans2.packages)
-        #self.label.setText("Applying changes...")
+        self.label.setText("Applying changes...")
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed',
@@ -250,18 +196,6 @@ class Dialog(QWidget):
                                      self.upgrade_progress_download)
             self.trans2.connect('finished', self.upgrade_finish)
             self.trans2.connect('error', self.upgrade_error)
-            self.trans2.connect("status-details-changed", self.status_details_changed)
-            self.trans2.connect("status-changed", self.status_changed)
-
-            #TODO make a terminal work to see more info
-            self.trans2.set_terminal(os.ttyname(self.slave))
-
-            '''
-            #TODO implement this
-            self.trans2.connect("medium-required", self._on_medium_required)
-            self.trans2.connect("config-file-conflict", self._on_config_file_conflict)
-            remove_obsoleted_depends
-            '''
             self.trans2.set_debconf_frontend('kde')
             '''
             Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
@@ -305,8 +239,6 @@ def main(args, options):
         sys.exit(1)
     else:
         app.exec_()
-
-    app.exec_()
 
 
 if __name__ == "__main__":
