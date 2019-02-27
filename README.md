@@ -2,7 +2,7 @@
 Installation Instruction:
 Install packages (via apt or similar):
 - update-notifier-common
-- aptdaemonz
+- aptdaemon
 - debconf-kde-helper
 
 This files are the ones that need to be downloaded and need to be copied in the same directory, the files are:
