@@ -67,6 +67,7 @@ class Dialog(QWidget):
                 text = text + "\nReboot is needed"
 
         self.label.setText(text)
+        self.plainTextEdit.setEnabled(True)
 
     def call_reject(self):
         app.quit()
