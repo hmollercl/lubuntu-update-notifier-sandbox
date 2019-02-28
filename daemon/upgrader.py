@@ -80,6 +80,7 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setVisible(False)
+        self.plainTextEdit.setEnabled(False)
         self.center()
 
     def center(self):
@@ -112,8 +113,6 @@ class Dialog(QWidget):
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         else:
-            cursor = self.plainTextEdit.textCursor()#moves cursor to end to avoid writig in other part
-            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
@@ -129,8 +128,6 @@ class Dialog(QWidget):
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         else:
-            cursor = self.plainTextEdit.textCursor()#moves cursor to end to avoid writig in other part
-            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
@@ -173,8 +170,6 @@ class Dialog(QWidget):
             text = text + "\n With some Errors"
             self.plainTextEdit.appendPlainText("Error Resume:\n")
             for error in self.errors:
-                cursor = self.plainTextEdit.textCursor()#moves cursor to end to avoid writig in other part
-                cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
                 self.plainTextEdit.insertPlainText(error + "\n")
                 self.plainTextEdit.insertPlainText(error_string + "\n")
                 self.plainTextEdit.insertPlainText(error_desc + "\n")
@@ -227,8 +222,6 @@ class Dialog(QWidget):
         if exit_state == EXIT_FAILED:
             error_string = get_error_string_from_enum(transaction.error.code)
             error_desc = get_error_description_from_enum(transaction.error.code)
-            cursor = self.plainTextEdit.textCursor()#moves cursor to end to avoid writig in other part
-            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             self.plainTextEdit.insertPlainText(error_string + "\n")
             self.plainTextEdit.insertPlainText(error_desc + "\n")
 
