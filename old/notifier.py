@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QPlainTextEdit)
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import (QIcon, QPalette)
 from optparse import OptionParser
 
 from pathlib import Path
@@ -34,6 +34,9 @@ class Dialog(QWidget):
         self.plainTextEdit.setVisible(False)
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setEnabled(False)
+        palette = self.plainTextEdit.palette()
+        palette.setColor(QPalette.Base, Qt.black)
+        palette.setColor(QPalette.Base, Qt.green)
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
