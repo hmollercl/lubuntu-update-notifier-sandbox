@@ -32,6 +32,8 @@ class Dialog(QWidget):
         self.plainTextEdit = QPlainTextEdit()
         text = ""
         self.plainTextEdit.setVisible(False)
+        self.plainTextEdit.setReadOnly(True)
+        self.plainTextEdit.setEnabled(False)
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -53,9 +55,9 @@ class Dialog(QWidget):
 
         if self.upgrades > 0:
             text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
-            self.plainTextEdit.setVisible(False)
+            self.plainTextEdit.setVisible(True)
             for pkg in self.packages:
-                self.plainTextEdit.append(pkg)
+                self.plainTextEdit.appendPlainText(str(pkg))
 
         if reboot_required:
             if text == "":

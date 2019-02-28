@@ -33,14 +33,14 @@ class update_worker_t():
     def check_updates_names(self):
         apt_check = "/usr/lib/update-notifier/apt-check"
         #output = subprocess.call(apt_check)
-        output = subprocess.check_output([apt_check, '-p'], stderr=subprocess.STDOUT)
+        output = subprocess.check_output([apt_check, '-p'], stderr=subprocess.STDOUT).decode('utf-8')
         print(output)
         print(subprocess.STDOUT)
         if (subprocess.STDOUT <= 0):
             #parts = output.split(b"\n")
             try:
                 #self.packages = int(parts[0])
-                self.packages = output.split(b"\n")
+                self.packages = output.split("\n")
                 self.upgrades = len(self.packages)
             except:
                 print ("PARSING OUTPUT FAILED")
