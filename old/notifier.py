@@ -37,6 +37,8 @@ class Dialog(QWidget):
         palette = self.plainTextEdit.palette()
         palette.setColor(QPalette.Base, Qt.black)
         palette.setColor(QPalette.Base, Qt.green)
+        self.plainTextEdit.setPalette(palette)
+
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
