@@ -2,14 +2,13 @@
 
 import sys
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
-							QHBoxLayout, QVBoxLayout, QPlainTextEdit)
+							QHBoxLayout, QVBoxLayout)
 from PyQt5.QtCore import (Qt, QProcess)
 from PyQt5.QtGui import (QIcon, QPalette)
 from optparse import OptionParser
 
 from pathlib import Path
 
-from update_worker import update_worker_t
 import subprocess
 
 class Dialog(QWidget):
@@ -39,7 +38,6 @@ class Dialog(QWidget):
         palette.setColor(QPalette.Text, Qt.gray)
         self.plainTextEdit.setPalette(palette)
 
-
         hbox=QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(self.upgradeBtn)
@@ -60,7 +58,8 @@ class Dialog(QWidget):
         self.center()
 
         if self.upgrades > 0:
-            text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
+            #text = "There are(is) %s upgrade(s) available and %s security update(s) available" % (self.upgrades, self.security_upgrades)
+            text = "There are(is) %s upgrade(s) available" % (self.upgrades)
             self.plainTextEdit.setVisible(True)
             for pkg in self.packages:
                 self.plainTextEdit.appendPlainText(str(pkg))
@@ -71,7 +70,6 @@ class Dialog(QWidget):
                 self.upgradeBtn.setVisible(False)
             else:
                 text = text + "\nReboot is needed"
-
         self.label.setText(text)
         self.plainTextEdit.setEnabled(True)
 
@@ -88,17 +86,34 @@ class Dialog(QWidget):
     def call_upgrade(self):
         self.label.setText("Upgrading....")
         #TODO maybe open another thread so notifier won't freeze
-        cmd = ['lxqt-sudo', self.upg_path]
+        if self.upg_path == "terminal":
+            #cmd = ['qterminal', '-e', 'sudo', 'apt', 'dist-upgrade']
+            cmd = ['qterminal', '-e', './upg.sh']
+        else:
+            cmd = ['lxqt-sudo', self.upg_path]
         #process = subprocess.Popen(self.upg_path)
-        #process = subprocess.Popen(cmd)
-#        process = subprocess.Popen(cmd, shell=True)
+        #process = subprocess.Popen(cmd, shell=True)
+        self.upgradeBtn.setVisible(False)
+        self.upgradeBtn.setEnabled(False)
         process = subprocess.Popen(cmd)
         process.wait()
-        app.quit()
+
+        if self.upg_path == "terminal":
+            text = "Upgrade finished"
+
+            reboot_required_path = Path("/var/run/reboot-required")
+            if reboot_required_path.exists():
+                text = text + "\n" + "Restart required"
+            self.label.setText(text)
+            self.closeBtn.setVisible(True)
+            self.closeBtn.setEnabled(True)
+
+        else:
+            app.quit()
 
 class App(QApplication):
     def __init__(self, upgrades, security_upgrades, packages, reboot_required, upg_path,
-    			 *args):
+    			*args):
         QApplication.__init__(self, *args)
         self.dialog = Dialog(upgrades, security_upgrades, packages, reboot_required,
         					 upg_path)
@@ -117,15 +132,23 @@ if __name__ == "__main__":
                       dest="upg_path",
                       help="Define software/app to open for upgrade",
                       metavar="APP")
-
+    parser.add_option("-u",
+                      "--upgrades",
+                      dest="upgrades",
+                      help="How many upgrades are available",
+                      metavar="APP")
+    parser.add_option("-s",
+                      "--security-upg",
+                      dest="security_upgrades",
+                      help="How many security upgrades are available",
+                      metavar="APP")
+    parser.add_option("-k",
+                      "--packages",
+                      dest="packages",
+                      help="list of packages",
+                      metavar="APP")
 
     (options, args) = parser.parse_args()
-
-    worker = update_worker_t()
-    #worker.check_for_updates()
-    worker.check_updates_names()
-    print(worker.packages)
-    print(worker.upgrades)
 
     reboot_required_path = Path("/var/run/reboot-required")
     if reboot_required_path.exists():
@@ -133,8 +156,16 @@ if __name__ == "__main__":
     else:
         reboot_required = False
 
-    if worker.upgrades > 0 or reboot_required:
-        main(sys.argv, worker.upgrades, worker.security_upgrades, worker.packages,
-        		reboot_required, options.upg_path)
+    print(options.packages)
+    if (options.packages != ""):
+        try:
+            #self.packages = int(parts[0])
+            packages = options.packages.split("\n")
+            options.upgrades = len(packages)
+        except:
+            print ("PARSING OUTPUT FAILED")
+    else:
+        self.upgrades = 0
 
-    sys.exit(0)
+    if int(options.upgrades) > 0 or reboot_required:
+        main(sys.argv, int(options.upgrades), int(options.security_upgrades), packages, reboot_required, options.upg_path)
