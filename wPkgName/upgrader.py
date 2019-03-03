@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							 QPlainTextEdit, QMessageBox)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor)
+from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor, QPalette)
 from optparse import OptionParser
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
@@ -84,7 +84,9 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setVisible(False)
-        self.plainTextEdit.setEnabled(False)
+        #TODO disabling textEdit make autoscroll (when append) stop working
+        #should try enabliing before append disabling after
+        #self.plainTextEdit.setEnabled(False)
         self.center()
 
     def center(self):
@@ -181,7 +183,7 @@ class Dialog(QWidget):
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
-        self.plainTextEdit.setEnabled(True)
+        #self.plainTextEdit.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
         self.plainTextEdit.setVisible(True)

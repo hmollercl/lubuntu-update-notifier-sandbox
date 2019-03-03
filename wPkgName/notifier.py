@@ -36,7 +36,7 @@ class Dialog(QWidget):
         self.plainTextEdit.setEnabled(False)
         palette = self.plainTextEdit.palette()
         palette.setColor(QPalette.Base, Qt.black)
-        palette.setColor(QPalette.text, Qt.gray)
+        palette.setColor(QPalette.Text, Qt.gray)
         self.plainTextEdit.setPalette(palette)
 
 
