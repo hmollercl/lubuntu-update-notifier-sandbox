@@ -140,14 +140,14 @@ class Dialog(QWidget):
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size))
+            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             #self.plainTextEdit.setEnabled(True)
         else:
             self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
             #self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size))
+            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.plainTextEdit.moveCursor(QTextCursor.End)
             #self.plainTextEdit.setEnabled(True)
             self.old_short_desc = short_desc
