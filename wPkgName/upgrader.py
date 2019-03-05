@@ -112,30 +112,44 @@ class Dialog(QWidget):
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         #self.label.setText(self.downloadText)
         if self.old_short_desc == short_desc:
+            #self.plainTextEdit.setEnabled(False)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            #self.plainTextEdit.setEnabled(True)
         else:
+            self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
+            #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
+            #self.plainTextEdit.setEnabled(True)
             self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.plainTextEdit.setVisible(True)
         if self.old_short_desc == short_desc:
+            #self.plainTextEdit.setEnabled(False)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            #self.plainTextEdit.setEnabled(True)
         else:
+            self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
+            #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
+            #self.plainTextEdit.setEnabled(True)
             self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
@@ -176,14 +190,16 @@ class Dialog(QWidget):
             text = text + "\n With some Errors"
             self.plainTextEdit.appendPlainText("Error Resume:\n")
             for error in self.errors:
+                self.plainTextEdit.setEnabled(False)
                 self.plainTextEdit.insertPlainText(error + "\n")
                 self.plainTextEdit.insertPlainText(error_string + "\n")
                 self.plainTextEdit.insertPlainText(error_desc + "\n")
+                self.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
 
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
-        #self.plainTextEdit.setEnabled(True)
+        self.plainTextEdit.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
         self.plainTextEdit.setVisible(True)
@@ -229,8 +245,12 @@ class Dialog(QWidget):
         if exit_state == EXIT_FAILED:
             error_string = get_error_string_from_enum(transaction.error.code)
             error_desc = get_error_description_from_enum(transaction.error.code)
+            self.plainTextEdit.setEnabled(False)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.insertPlainText(error_string + "\n")
             self.plainTextEdit.insertPlainText(error_desc + "\n")
+            self.plainTextEdit.moveCursor(QTextCursor.End)
+            self.plainTextEdit.setEnabled(True)
 
         self.upgrade()
 
@@ -241,6 +261,7 @@ class Dialog(QWidget):
 
     def status_details_changed(self, transaction, details):
         self.plainTextEdit.appendPlainText(details)
+        self.plainTextEdit.moveCursor(QTextCursor.End)
         #print("PTY:" + str(self.slave))
         self.label.setText(details)
         print("Status Details:" + details + "\n")
