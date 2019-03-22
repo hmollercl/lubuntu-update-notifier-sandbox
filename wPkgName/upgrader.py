@@ -35,6 +35,7 @@ class Dialog(QWidget):
         self.downloadText = ""
         self.detailText = ""
         self.old_short_desc=""
+        self.details=""
         self.errors = []
 
         self.master, self.slave = pty.openpty()
@@ -260,11 +261,12 @@ class Dialog(QWidget):
         print("Status:" + get_status_string_from_enum(status) +"\n")
 
     def status_details_changed(self, transaction, details):
-        self.plainTextEdit.appendPlainText(details)
-        self.plainTextEdit.moveCursor(QTextCursor.End)
-        #print("PTY:" + str(self.slave))
-        self.label.setText(details)
-        print("Status Details:" + details + "\n")
+        if self.details != details:
+            self.plainTextEdit.appendPlainText(details)
+            self.plainTextEdit.moveCursor(QTextCursor.End)
+            #print("PTY:" + str(self.slave))
+            self.label.setText(details)
+            print("Status Details:" + details + "\n")
 
     def upgrade(self):
         #print(self.trans2.packages)
