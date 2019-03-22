@@ -194,7 +194,7 @@ class Dialog(QWidget):
                 self.plainTextEdit.insertPlainText(error + "\n")
                 self.plainTextEdit.insertPlainText(error_string + "\n")
                 self.plainTextEdit.insertPlainText(error_desc + "\n")
-                self.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
+                self.plainTextEdit.moveCursor(QTextCursor.End)
 
         self.label.setText(text)
         self.closeBtn.setVisible(True)
