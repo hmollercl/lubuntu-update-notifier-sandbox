@@ -10,10 +10,10 @@ import subprocess
 
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
-							 QPlainTextEdit, QMessageBox)
+							 QTextEdit, QMessageBox)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor, QPalette)
+from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor)
 from optparse import OptionParser
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
@@ -35,7 +35,6 @@ class Dialog(QWidget):
         self.downloadText = ""
         self.detailText = ""
         self.old_short_desc=""
-        self.details=""
         self.errors = []
 
         self.master, self.slave = pty.openpty()
@@ -62,11 +61,7 @@ class Dialog(QWidget):
         self.label.setAlignment(Qt.AlignHCenter)
         self.closeBtn = QPushButton("Close")
         self.progressBar = QProgressBar()
-        self.plainTextEdit = QPlainTextEdit()
-        palette = self.plainTextEdit.palette()
-        palette.setColor(QPalette.Base, Qt.black)
-        palette.setColor(QPalette.Text, Qt.gray)
-        self.plainTextEdit.setPalette(palette)
+        self.textEdit = QTextEdit()
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -76,18 +71,15 @@ class Dialog(QWidget):
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
-        vbox.addWidget(self.plainTextEdit)
+        vbox.addWidget(self.textEdit)
         vbox.addLayout(hbox)
 
         self.setLayout(vbox)
         self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
-        self.plainTextEdit.setReadOnly(True)
-        self.plainTextEdit.setVisible(False)
-        #TODO disabling textEdit make autoscroll (when append) stop working
-        #should try enabliing before append disabling after
-        #self.plainTextEdit.setEnabled(False)
+        self.textEdit.setReadOnly(True)
+        self.textEdit.setVisible(False)
         self.center()
 
     def center(self):
@@ -108,60 +100,46 @@ class Dialog(QWidget):
 
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.plainTextEdit.setVisible(True)
+        self.textEdit.setVisible(True)
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         #self.label.setText(self.downloadText)
         if self.old_short_desc == short_desc:
-            #self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            cursor = self.plainTextEdit.textCursor()
+            cursor = self.textEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            #self.plainTextEdit.setEnabled(True)
         else:
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            #self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            #self.plainTextEdit.setEnabled(True)
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.plainTextEdit.setVisible(True)
+        self.textEdit.setVisible(True)
         if self.old_short_desc == short_desc:
-            #self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            cursor = self.plainTextEdit.textCursor()
+            cursor = self.textEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            #self.plainTextEdit.setEnabled(True)
         else:
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            #self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            #self.plainTextEdit.setEnabled(True)
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
         #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
-            self.plainTextEdit.setVisible(True)
+            self.textEdit.setVisible(True)
             if self.detailText != "Fetching " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
-                #self.plainTextEdit.appendPlainText(self.detailText + "\n" + self.downloadText)
+                #self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
@@ -169,11 +147,11 @@ class Dialog(QWidget):
         #self.detailText = "Upgrading..."
         #self.label.setText(self.detailText)
         if total_items > 0:
-            self.plainTextEdit.setVisible(True)
+            self.textEdit.setVisible(True)
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
-                #self.plainTextEdit.appendPlainText(self.detailText + "\n" + self.downloadText)
+                #self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
     def upgrade_finish(self, transaction, exit_state):
         if exit_state == EXIT_FAILED:
@@ -189,26 +167,23 @@ class Dialog(QWidget):
 
         if(len(self.errors)>0):
             text = text + "\n With some Errors"
-            self.plainTextEdit.appendPlainText("Error Resume:\n")
+            self.textEdit.append("Error Resume:\n")
             for error in self.errors:
-                self.plainTextEdit.setEnabled(False)
-                self.plainTextEdit.insertPlainText(error + "\n")
-                self.plainTextEdit.insertPlainText(error_string + "\n")
-                self.plainTextEdit.insertPlainText(error_desc + "\n")
-                self.plainTextEdit.moveCursor(QTextCursor.End)
+                self.textEdit.insertPlainText(error + "\n")
+                self.textEdit.insertPlainText(error_string + "\n")
+                self.textEdit.insertPlainText(error_desc + "\n")
 
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
-        self.plainTextEdit.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
-        self.plainTextEdit.setVisible(True)
+        self.textEdit.setVisible(True)
         self.errors.append("Eror Code: " + str(error_code))
         self.errors.append("Error Detail: " + error_details)
         #for error in self.errors:
-            #self.plainTextEdit.appendPlainText(error)
-        self.plainTextEdit.setVisible(True)
+            #self.textEdit.append(error)
+        self.textEdit.setVisible(True)
         self.closeBtn.setEnabled(True)
         print("ECode: " + str(error_code) + "\n")
         print("EDetail: " + error_details + "\n")
@@ -246,27 +221,21 @@ class Dialog(QWidget):
         if exit_state == EXIT_FAILED:
             error_string = get_error_string_from_enum(transaction.error.code)
             error_desc = get_error_description_from_enum(transaction.error.code)
-            self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.insertPlainText(error_string + "\n")
-            self.plainTextEdit.insertPlainText(error_desc + "\n")
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.setEnabled(True)
+            self.textEdit.insertPlainText(error_string + "\n")
+            self.textEdit.insertPlainText(error_desc + "\n")
 
         self.upgrade()
 
     def status_changed(self, transaction, status):
-        #self.plainTextEdit.appendPlainText("Status:" + status)
+        #self.textEdit.append("Status:" + status)
         self.label.setText("Status:" + get_status_string_from_enum(status))
         print("Status:" + get_status_string_from_enum(status) +"\n")
 
     def status_details_changed(self, transaction, details):
-        if self.details != details:
-            self.plainTextEdit.appendPlainText(details)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            #print("PTY:" + str(self.slave))
-            self.label.setText(details)
-            print("Status Details:" + details + "\n")
+        self.textEdit.append(details)
+        #print("PTY:" + str(self.slave))
+        self.label.setText(details)
+        print("Status Details:" + details + "\n")
 
     def upgrade(self):
         #print(self.trans2.packages)
@@ -329,14 +298,14 @@ def main(args, options):
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
 
     # Check for root permissions
-    if os.geteuid() != 0:
+    '''if os.geteuid() != 0:
         text = "Please run this software with administrative rights. To do so, run this program with lxqt-sudo."
         title = "Need administrative powers"
         msgbox = QMessageBox.critical(None, title, text)
         sys.exit(1)
     else:
         app.exec_()
-
+    '''
     app.exec_()
 
 
