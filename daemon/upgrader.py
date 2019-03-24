@@ -262,6 +262,7 @@ class Dialog(QWidget):
 
     def status_details_changed(self, transaction, details):
         if self.details != details:
+            self.details = details
             self.plainTextEdit.appendPlainText(details)
             self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
