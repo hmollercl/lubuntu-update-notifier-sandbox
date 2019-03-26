@@ -37,8 +37,8 @@ class Dialog(QWidget):
         self.old_short_desc=""
         self.details=""
         self.errors = []
-
-        self.master, self.slave = pty.openpty()
+        #TODO make a terminal work to see more info
+        #self.master, self.slave = pty.openpty()
         '''proc = subprocess.Popen(['qterminal'],
                             stdin=self.slave,
                             #stdout=subprocess.PIPE,
@@ -261,6 +261,7 @@ class Dialog(QWidget):
         print("Status:" + get_status_string_from_enum(status) +"\n")
 
     def status_details_changed(self, transaction, details):
+        self.plainTextEdit.setVisible(True)
         if self.details != details:
             self.details = details
             self.plainTextEdit.appendPlainText(details)
@@ -286,7 +287,7 @@ class Dialog(QWidget):
             self.trans2.connect("status-changed", self.status_changed)
 
             #TODO make a terminal work to see more info
-            self.trans2.set_terminal(os.ttyname(self.slave))
+            #self.trans2.set_terminal(os.ttyname(self.slave))
 
             '''
             #TODO implement this
@@ -295,19 +296,6 @@ class Dialog(QWidget):
             remove_obsoleted_depends
             '''
             self.trans2.set_debconf_frontend('kde')
-            '''
-            Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
-Unable to execute debconf-kde-helper - is debconf-kde-helper installed?Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
-Unable to execute debconf-kde-helper - is debconf-kde-helper installed?'''
-            #self.trans2.set_debconf_frontend('gnome')
-            '''
-            debconf: no se pudo inicializar la interfaz: Gnome
-debconf: (Can't locate Gtk3.pm in @INC (you may need to install the Gtk3 module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.28.1 /usr/local/share/perl/5.28.1 /usr/lib/x86_64-linux-gnu/perl5/5.28 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.28 /usr/share/perl/5.28 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Gnome.pm line 151.)
-debconf: probando ahora la interfaz: Dialog
-debconf: no se pudo inicializar la interfaz: Dialog
-debconf: (La interfaz «dialog» no funcionará en un terminal tonto, un búfer de intérprete de órdenes de emacs, o sin una terminal controladora.)
-debconf: probando ahora la interfaz: Readline
-'''
             self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:
