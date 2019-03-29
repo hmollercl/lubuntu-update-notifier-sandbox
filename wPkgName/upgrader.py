@@ -268,7 +268,7 @@ class Dialog(QWidget):
             self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
             self.label.setText(details)
-            print("Status Details:" + details + " /Transaction:"+ transaction + "\n") #debuging if transaction is download don't show beacuse downloadsa are handled by "upgrade_progress_download" in short_desc
+            print("Status Details:" + details + " /Transaction:"+ str(transaction) + "\n") #debuging if transaction is download don't show beacuse downloadsa are handled by "upgrade_progress_download" in short_desc
 
     def upgrade(self):
         #print(self.trans2.packages)
