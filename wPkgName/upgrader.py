@@ -112,7 +112,7 @@ class Dialog(QWidget):
         #self.downloadText = "Fetching\n" + short_desc
         #self.label.setText(self.detailText + "\n" + self.downloadText)
         #self.label.setText(self.downloadText)
-        if self.old_short_desc == short_desc:
+        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
             #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
@@ -134,7 +134,7 @@ class Dialog(QWidget):
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.plainTextEdit.setVisible(True)
-        if self.old_short_desc == short_desc:
+        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
             #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
@@ -264,9 +264,10 @@ class Dialog(QWidget):
         self.plainTextEdit.setVisible(True)
         if self.details != details:
             self.details = details
-            #TODO check if details is "Downloading xxxxx" and if it is, don't print in plainTextEdit because it's handled by "upgrade_progress_download" in short_desc
-            self.plainTextEdit.appendPlainText(details)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
+
+            if not details.startswith("Downloading"): #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
+                self.plainTextEdit.appendPlainText(details)
+                self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
             self.label.setText(details)
             print("Status Details:" + details)
