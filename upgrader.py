@@ -37,8 +37,8 @@ class Dialog(QWidget):
         self.old_short_desc=""
         self.details=""
         self.errors = []
-
-        self.master, self.slave = pty.openpty()
+        #TODO make a terminal work to see more info
+        #self.master, self.slave = pty.openpty()
         '''proc = subprocess.Popen(['qterminal'],
                             stdin=self.slave,
                             #stdout=subprocess.PIPE,
@@ -85,9 +85,6 @@ class Dialog(QWidget):
         self.progressBar.setVisible(False)
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setVisible(False)
-        #TODO disabling textEdit make autoscroll (when append) stop working
-        #should try enabliing before append disabling after
-        #self.plainTextEdit.setEnabled(False)
         self.center()
 
     def center(self):
@@ -109,11 +106,7 @@ class Dialog(QWidget):
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.plainTextEdit.setVisible(True)
-        #self.downloadText = "Fetching\n" + short_desc
-        #self.label.setText(self.detailText + "\n" + self.downloadText)
-        #self.label.setText(self.downloadText)
-        if self.old_short_desc == short_desc:
-            #self.plainTextEdit.setEnabled(False)
+        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
             self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
@@ -121,21 +114,18 @@ class Dialog(QWidget):
             cursor.removeSelectedText()
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            #self.plainTextEdit.setEnabled(True)
         else:
             self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.plainTextEdit.moveCursor(QTextCursor.End)
-            #self.plainTextEdit.setEnabled(True)
             self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.plainTextEdit.setVisible(True)
-        if self.old_short_desc == short_desc:
-            #self.plainTextEdit.setEnabled(False)
+        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
+            #TODO it prints the last line after installation is complete, need to manage this.
             self.plainTextEdit.moveCursor(QTextCursor.End)
             cursor = self.plainTextEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
@@ -143,25 +133,20 @@ class Dialog(QWidget):
             cursor.removeSelectedText()
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            #self.plainTextEdit.setEnabled(True)
         else:
             self.plainTextEdit.moveCursor(QTextCursor.End)
             self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            #self.plainTextEdit.setEnabled(False)
             self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.plainTextEdit.moveCursor(QTextCursor.End)
-            #self.plainTextEdit.setEnabled(True)
             self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
-        #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
             self.plainTextEdit.setVisible(True)
             if self.detailText != "Fetching " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
-                #self.plainTextEdit.appendPlainText(self.detailText + "\n" + self.downloadText)
 
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
@@ -173,7 +158,6 @@ class Dialog(QWidget):
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
-                #self.plainTextEdit.appendPlainText(self.detailText + "\n" + self.downloadText)
 
     def upgrade_finish(self, transaction, exit_state):
         if exit_state == EXIT_FAILED:
@@ -256,22 +240,22 @@ class Dialog(QWidget):
         self.upgrade()
 
     def status_changed(self, transaction, status):
-        #self.plainTextEdit.appendPlainText("Status:" + status)
         self.label.setText("Status:" + get_status_string_from_enum(status))
         print("Status:" + get_status_string_from_enum(status) +"\n")
 
     def status_details_changed(self, transaction, details):
+        self.plainTextEdit.setVisible(True)
         if self.details != details:
             self.details = details
-            self.plainTextEdit.appendPlainText(details)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
+
+            if not details.startswith("Downloading"): #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
+                self.plainTextEdit.appendPlainText(details)
+                self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
             self.label.setText(details)
-            print("Status Details:" + details + "\n")
+            print("Status Details:" + details)
 
     def upgrade(self):
-        #print(self.trans2.packages)
-        #self.label.setText("Applying changes...")
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed',
@@ -286,7 +270,7 @@ class Dialog(QWidget):
             self.trans2.connect("status-changed", self.status_changed)
 
             #TODO make a terminal work to see more info
-            self.trans2.set_terminal(os.ttyname(self.slave))
+            #self.trans2.set_terminal(os.ttyname(self.slave))
 
             '''
             #TODO implement this
@@ -295,19 +279,6 @@ class Dialog(QWidget):
             remove_obsoleted_depends
             '''
             self.trans2.set_debconf_frontend('kde')
-            '''
-            Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
-Unable to execute debconf-kde-helper - is debconf-kde-helper installed?Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
-Unable to execute debconf-kde-helper - is debconf-kde-helper installed?'''
-            #self.trans2.set_debconf_frontend('gnome')
-            '''
-            debconf: no se pudo inicializar la interfaz: Gnome
-debconf: (Can't locate Gtk3.pm in @INC (you may need to install the Gtk3 module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.28.1 /usr/local/share/perl/5.28.1 /usr/lib/x86_64-linux-gnu/perl5/5.28 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.28 /usr/share/perl/5.28 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Gnome.pm line 151.)
-debconf: probando ahora la interfaz: Dialog
-debconf: no se pudo inicializar la interfaz: Dialog
-debconf: (La interfaz «dialog» no funcionará en un terminal tonto, un búfer de intérprete de órdenes de emacs, o sin una terminal controladora.)
-debconf: probando ahora la interfaz: Readline
-'''
             self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:
