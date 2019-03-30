@@ -36,6 +36,7 @@ class Dialog(QWidget):
         self.detailText = ""
         self.old_short_desc=""
         self.details=""
+        self.status=""
         self.errors = []
         #TODO make a terminal work to see more info
         #self.master, self.slave = pty.openpty()
@@ -124,21 +125,21 @@ class Dialog(QWidget):
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
         self.plainTextEdit.setVisible(True)
-        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
-            #TODO it prints the last line after installation is complete, need to manage this.
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            cursor = self.plainTextEdit.textCursor()
-            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            cursor.select(QTextCursor.LineUnderCursor)
-            cursor.removeSelectedText()
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-        else:
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.old_short_desc = short_desc
+        if self.status == "status-downloading":#TODO it prints the last line after installation is complete, need to manage this.
+            if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
+                self.plainTextEdit.moveCursor(QTextCursor.End)
+                cursor = self.plainTextEdit.textCursor()
+                cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+                cursor.select(QTextCursor.LineUnderCursor)
+                cursor.removeSelectedText()
+                self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+                cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            else:
+                self.plainTextEdit.moveCursor(QTextCursor.End)
+                self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
+                self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+                self.plainTextEdit.moveCursor(QTextCursor.End)
+                self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
@@ -240,15 +241,16 @@ class Dialog(QWidget):
         self.upgrade()
 
     def status_changed(self, transaction, status):
+        self.status = status
         self.label.setText("Status:" + get_status_string_from_enum(status))
-        print("Status:" + get_status_string_from_enum(status) +"\n")
+        print("Status:" + get_status_string_from_enum(status) + " " + status + "\n")
 
     def status_details_changed(self, transaction, details):
         self.plainTextEdit.setVisible(True)
         if self.details != details:
             self.details = details
 
-            if not details.startswith("Downloading"): #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
+            if self.status != "status-downloading": #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
                 self.plainTextEdit.appendPlainText(details)
                 self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
