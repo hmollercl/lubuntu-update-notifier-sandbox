@@ -264,11 +264,12 @@ class Dialog(QWidget):
         self.plainTextEdit.setVisible(True)
         if self.details != details:
             self.details = details
+            #TODO check if details is "Downloading xxxxx" and if it is, don't print in plainTextEdit because it's handled by "upgrade_progress_download" in short_desc
             self.plainTextEdit.appendPlainText(details)
             self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
             self.label.setText(details)
-            print("Status Details:" + details + " /Transaction:"+ str(transaction) + "\n") #debuging if transaction is download don't show beacuse downloadsa are handled by "upgrade_progress_download" in short_desc
+            print("Status Details:" + details)
 
     def upgrade(self):
         #print(self.trans2.packages)
