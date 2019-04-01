@@ -12,7 +12,7 @@ This files are the ones that need to be downloaded and need to be copied in the 
 
 run upNotWorker.sh to check every hour if there are updates. It's recommended to add an entry in autostart. By going to:
 Preferences -> LXQt configuration -> Sesion confuiguration
-There you got to autosart, pres add, in Name put something like "Update Notifier" in Comand search for upNot.sh done.
+There you got to autosart, pres add, in Name put something like "Update Notifier" in Comand search for upNotWorker.sh
 
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -27,6 +27,8 @@ To check if upgrades exists it uses apt_check from update-notifier-common.
 Cache update is run periodically by update-notifier-common.
 If there are upgrades it calls notifier_gui.py using this command:
 ./notifier_gui.py -u $UPG -s $SEC -p ./upgrader.py
+or
+./notifier_gui.py -k $OUT -p ./upgrader.py
 
 - notifier_gui.py
 this script has 2 options that can be readed with --help:
