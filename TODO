@@ -8,3 +8,18 @@ maybe start in another thread?
 - Implement aptdaemon.client.transaction.remove_obsoleted_depends
 
 - Move to libqapt (qt) instead of aptdaemon for better qt integration.
+
+
+
+last download line override last "Installed" line
+....
+download-fetching python3-aptdaemon
+76964/76964
+....
+Installed g++-8
+Preparing configuration of aptdaemon
+Configuring aptdaemon
+Installed aptdaemon
+Preparing configuration of python3-aptdaemon
+Configuring python3-aptdaemon
+76964/76964
