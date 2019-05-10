@@ -217,7 +217,7 @@ class Dialog(QWidget):
             #self.trans1.connect("status-details-changed", self.status_details_changed)
             self.trans1.connect("status-changed", self.status_changed)
             #TODO make a terminal work to see more info
-            self.trans1.set_terminal(os.ttyname(self.slave))
+            #self.trans1.set_terminal(os.ttyname(self.slave))
 
             self.trans1.run()
             #print(self.trans1)
