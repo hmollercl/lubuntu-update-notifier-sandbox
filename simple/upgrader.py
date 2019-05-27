@@ -256,7 +256,7 @@ class DialogUpg(QWidget):
                 self.plainTextEdit.appendPlainText(details)
                 self.plainTextEdit.moveCursor(QTextCursor.End)
             #print("PTY:" + str(self.slave))
-            self.label.setText(details)
+            self.label.setText(self.detailText + "\n" details) #TODO check if with this during download appear downaloading x of y \n the name of the package.
             print("Status Details:" + details)
 
     def upgrade(self):
@@ -283,7 +283,7 @@ class DialogUpg(QWidget):
             remove_obsoleted_depends
             '''
             self.trans2.set_debconf_frontend('kde')
-            #self.trans2.run()
+            self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully:" +
