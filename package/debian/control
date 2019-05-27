@@ -13,6 +13,5 @@ Depends: ${shlibs:Depends}, ${python3:Depends}, ${misc:Depends},
 
 Description: Daemon which notifies about package updates
  Opens a window when package updates are available.
- It also allows to do the updates.
- An on demand upgrade can be triggered.
+ It also allows to do a full upgrade, aka dist-upgrade.
 
