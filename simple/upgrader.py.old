@@ -10,10 +10,10 @@ import subprocess
 
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
-							 QPlainTextEdit, QMessageBox)
+							 QTextEdit, QMessageBox)
 from PyQt5 import uic
 from PyQt5.QtCore import (Qt, QProcess)
-from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor, QPalette)
+from PyQt5.QtGui import (QStandardItemModel, QIcon, QTextCursor)
 from optparse import OptionParser
 from aptdaemon import client
 from aptdaemon.errors import NotAuthorizedError, TransactionFailed
@@ -25,8 +25,8 @@ from aptdaemon.enums import (EXIT_SUCCESS,
                              get_status_string_from_enum)
 from pathlib import Path
 
-class DialogUpg(QWidget):
-    def __init__(self, options=None, pkg=None):
+class Dialog(QWidget):
+    def __init__(self, options=None):
         QWidget.__init__(self)
 
         self.initUI()
@@ -35,11 +35,9 @@ class DialogUpg(QWidget):
         self.downloadText = ""
         self.detailText = ""
         self.old_short_desc=""
-        self.details=""
-        self.status=""
         self.errors = []
-        #TODO make a terminal work to see more info
-        #self.master, self.slave = pty.openpty()
+
+        self.master, self.slave = pty.openpty()
         '''proc = subprocess.Popen(['qterminal'],
                             stdin=self.slave,
                             #stdout=subprocess.PIPE,
@@ -47,24 +45,10 @@ class DialogUpg(QWidget):
                             #stderr=subprocess.PIPE
                             stderr=self.slave)'''
 
-        if(len(pkgs)>0):
-            #need to separate install from upgrade packages
-            '''with depcahce it would be:
-            depcache.marked_install(pkg) or depcache.marked_upgrade(pkg)
-
-            depcahceh ussage:
-            apt_pkg.init()
-            cache = apt_pkg.Cache(apt.progress.base.OpProgress())#la idea seria no hacer el update del cache.
-            depcache = apt_pkg.DepCache(cache)
-
-            apparently can't be done with aptdaemon'''
-
-            self.trans2 = self.apt_client.commit_packages(install=pkg, remove=[], reinstall=[], purge=[], upgrade=[], downgrade=[])
+        if options.fullUpgrade:
+            self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
         else:
-            if options.fullUpgrade:
-                self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
-            else:
-                self.trans2 = self.apt_client.upgrade_system(safe_mode=True)
+            self.trans2 = self.apt_client.upgrade_system(safe_mode=True)
 
         if options.cacheUpdate:
             self.trans1 = self.apt_client.update_cache()
@@ -77,11 +61,7 @@ class DialogUpg(QWidget):
         self.label.setAlignment(Qt.AlignHCenter)
         self.closeBtn = QPushButton("Close")
         self.progressBar = QProgressBar()
-        self.plainTextEdit = QPlainTextEdit()
-        palette = self.plainTextEdit.palette()
-        palette.setColor(QPalette.Base, Qt.black)
-        palette.setColor(QPalette.Text, Qt.gray)
-        self.plainTextEdit.setPalette(palette)
+        self.textEdit = QTextEdit()
 
         hbox=QHBoxLayout()
         hbox.addStretch(1)
@@ -91,15 +71,15 @@ class DialogUpg(QWidget):
         vbox=QVBoxLayout()
         vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
-        vbox.addWidget(self.plainTextEdit)
+        vbox.addWidget(self.textEdit)
         vbox.addLayout(hbox)
 
         self.setLayout(vbox)
         self.setGeometry(300, 300, 500, 150)
         self.setWindowTitle('Upgrade')
         self.progressBar.setVisible(False)
-        self.plainTextEdit.setReadOnly(True)
-        self.plainTextEdit.setVisible(False)
+        self.textEdit.setReadOnly(True)
+        self.textEdit.setVisible(False)
         self.center()
 
     def center(self):
@@ -120,48 +100,46 @@ class DialogUpg(QWidget):
 
     def update_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.plainTextEdit.setVisible(True)
-        if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            cursor = self.plainTextEdit.textCursor()
+        self.textEdit.setVisible(True)
+        #self.downloadText = "Fetching\n" + short_desc
+        #self.label.setText(self.detailText + "\n" + self.downloadText)
+        #self.label.setText(self.downloadText)
+        if self.old_short_desc == short_desc:
+            cursor = self.textEdit.textCursor()
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
             cursor.select(QTextCursor.LineUnderCursor)
             cursor.removeSelectedText()
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         else:
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-            self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
             self.old_short_desc = short_desc
 
     def upgrade_progress_download(self, transaction, uri, status, short_desc,
                                   total_size, current_size, msg):
-        self.plainTextEdit.setVisible(True)
-        if self.status == "status-downloading":#TODO it prints the last line after installation is complete, need to manage this.
-            if self.old_short_desc == short_desc: #if it's the same file we update the line, don't append new line
-                self.plainTextEdit.moveCursor(QTextCursor.End)
-                cursor = self.plainTextEdit.textCursor()
-                cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-                cursor.select(QTextCursor.LineUnderCursor)
-                cursor.removeSelectedText()
-                self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-                cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
-            else:
-                self.plainTextEdit.moveCursor(QTextCursor.End)
-                self.plainTextEdit.appendPlainText(status + " " + short_desc + "\n")
-                self.plainTextEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
-                self.plainTextEdit.moveCursor(QTextCursor.End)
-                self.old_short_desc = short_desc
+        self.textEdit.setVisible(True)
+        if self.old_short_desc == short_desc:
+            cursor = self.textEdit.textCursor()
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+            cursor.select(QTextCursor.LineUnderCursor)
+            cursor.removeSelectedText()
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            cursor.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+        else:
+            self.textEdit.append(status + " " + short_desc + "\n")
+            self.textEdit.insertPlainText(str(current_size) + "/" + str(total_size) + " " + msg)
+            self.old_short_desc = short_desc
 
     def update_progress_detail(self, transaction, current_items, total_items,
                                 current_bytes, total_bytes, current_cps, eta):
+        #self.label.setText("Applying changes... " + str(current_items) + " of " + str(total_items))
         if total_items > 0:
-            self.plainTextEdit.setVisible(True)
+            self.textEdit.setVisible(True)
             if self.detailText != "Fetching " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Fetching " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
+                #self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
 
     def upgrade_progress_detail(self, transaction, current_items, total_items,
@@ -169,10 +147,11 @@ class DialogUpg(QWidget):
         #self.detailText = "Upgrading..."
         #self.label.setText(self.detailText)
         if total_items > 0:
-            self.plainTextEdit.setVisible(True)
+            self.textEdit.setVisible(True)
             if self.detailText != "Downloaded " + str(current_items) + " of " + str(total_items):
                 self.detailText = "Downloaded " + str(current_items) + " of " + str(total_items)
                 self.label.setText(self.detailText + "\n" + self.downloadText)
+                #self.textEdit.append(self.detailText + "\n" + self.downloadText)
 
     def upgrade_finish(self, transaction, exit_state):
         if exit_state == EXIT_FAILED:
@@ -188,26 +167,23 @@ class DialogUpg(QWidget):
 
         if(len(self.errors)>0):
             text = text + "\n With some Errors"
-            self.plainTextEdit.appendPlainText("Error Resume:\n")
+            self.textEdit.append("Error Resume:\n")
             for error in self.errors:
-                self.plainTextEdit.setEnabled(False)
-                self.plainTextEdit.insertPlainText(error + "\n")
-                self.plainTextEdit.insertPlainText(error_string + "\n")
-                self.plainTextEdit.insertPlainText(error_desc + "\n")
-                self.plainTextEdit.moveCursor(QTextCursor.End)
+                self.textEdit.insertPlainText(error + "\n")
+                self.textEdit.insertPlainText(error_string + "\n")
+                self.textEdit.insertPlainText(error_desc + "\n")
 
         self.label.setText(text)
         self.closeBtn.setVisible(True)
         self.closeBtn.setEnabled(True)
-        self.plainTextEdit.setEnabled(True)
 
     def upgrade_error(self, transaction, error_code, error_details):
-        self.plainTextEdit.setVisible(True)
+        self.textEdit.setVisible(True)
         self.errors.append("Eror Code: " + str(error_code))
         self.errors.append("Error Detail: " + error_details)
         #for error in self.errors:
-            #self.plainTextEdit.appendPlainText(error)
-        self.plainTextEdit.setVisible(True)
+            #self.textEdit.append(error)
+        self.textEdit.setVisible(True)
         self.closeBtn.setEnabled(True)
         print("ECode: " + str(error_code) + "\n")
         print("EDetail: " + error_details + "\n")
@@ -231,7 +207,7 @@ class DialogUpg(QWidget):
             #self.trans1.connect("status-details-changed", self.status_details_changed)
             self.trans1.connect("status-changed", self.status_changed)
             #TODO make a terminal work to see more info
-            #self.trans1.set_terminal(os.ttyname(self.slave))
+            self.trans1.set_terminal(os.ttyname(self.slave))
 
             self.trans1.run()
             #print(self.trans1)
@@ -245,33 +221,25 @@ class DialogUpg(QWidget):
         if exit_state == EXIT_FAILED:
             error_string = get_error_string_from_enum(transaction.error.code)
             error_desc = get_error_description_from_enum(transaction.error.code)
-            self.plainTextEdit.setEnabled(False)
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.insertPlainText(error_string + "\n")
-            self.plainTextEdit.insertPlainText(error_desc + "\n")
-            self.plainTextEdit.moveCursor(QTextCursor.End)
-            self.plainTextEdit.setEnabled(True)
+            self.textEdit.insertPlainText(error_string + "\n")
+            self.textEdit.insertPlainText(error_desc + "\n")
 
         self.upgrade()
 
     def status_changed(self, transaction, status):
-        self.status = status
+        #self.textEdit.append("Status:" + status)
         self.label.setText("Status:" + get_status_string_from_enum(status))
-        print("Status:" + get_status_string_from_enum(status) + " " + status + "\n")
+        print("Status:" + get_status_string_from_enum(status) +"\n")
 
     def status_details_changed(self, transaction, details):
-        self.plainTextEdit.setVisible(True)
-        if self.details != details:
-            self.details = details
-
-            if self.status != "status-downloading": #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
-                self.plainTextEdit.appendPlainText(details)
-                self.plainTextEdit.moveCursor(QTextCursor.End)
-            #print("PTY:" + str(self.slave))
-            self.label.setText(details)
-            print("Status Details:" + details)
+        self.textEdit.append(details)
+        #print("PTY:" + str(self.slave))
+        self.label.setText(details)
+        print("Status Details:" + details + "\n")
 
     def upgrade(self):
+        #print(self.trans2.packages)
+        #self.label.setText("Applying changes...")
         try:
             self.trans2.connect('progress-changed', self.upgrade_progress)
             self.trans2.connect('cancellable-changed',
@@ -286,7 +254,7 @@ class DialogUpg(QWidget):
             self.trans2.connect("status-changed", self.status_changed)
 
             #TODO make a terminal work to see more info
-            #self.trans2.set_terminal(os.ttyname(self.slave))
+            self.trans2.set_terminal(os.ttyname(self.slave))
 
             '''
             #TODO implement this
@@ -295,6 +263,19 @@ class DialogUpg(QWidget):
             remove_obsoleted_depends
             '''
             self.trans2.set_debconf_frontend('kde')
+            '''
+            Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
+Unable to execute debconf-kde-helper - is debconf-kde-helper installed?Can't exec "debconf-kde-helper": No existe el archivo o el directorio at /usr/share/perl5/Debconf/FrontEnd/Kde.pm line 43.
+Unable to execute debconf-kde-helper - is debconf-kde-helper installed?'''
+            #self.trans2.set_debconf_frontend('gnome')
+            '''
+            debconf: no se pudo inicializar la interfaz: Gnome
+debconf: (Can't locate Gtk3.pm in @INC (you may need to install the Gtk3 module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.28.1 /usr/local/share/perl/5.28.1 /usr/lib/x86_64-linux-gnu/perl5/5.28 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.28 /usr/share/perl/5.28 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Gnome.pm line 151.)
+debconf: probando ahora la interfaz: Dialog
+debconf: no se pudo inicializar la interfaz: Dialog
+debconf: (La interfaz «dialog» no funcionará en un terminal tonto, un búfer de intérprete de órdenes de emacs, o sin una terminal controladora.)
+debconf: probando ahora la interfaz: Readline
+'''
             self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:
@@ -307,7 +288,7 @@ class DialogUpg(QWidget):
 class App(QApplication):
     def __init__(self, options, *args):
         QApplication.__init__(self, *args)
-        self.dialog = DialogUpg(options)
+        self.dialog = Dialog(options)
         self.dialog.show()
 
 
@@ -317,13 +298,16 @@ def main(args, options):
     app.setWindowIcon(QIcon.fromTheme("system-software-update"))
 
     # Check for root permissions
-    if os.geteuid() != 0:
+    '''if os.geteuid() != 0:
         text = "Please run this software with administrative rights. To do so, run this program with lxqt-sudo."
         title = "Need administrative powers"
         msgbox = QMessageBox.critical(None, title, text)
         sys.exit(1)
     else:
         app.exec_()
+    '''
+    app.exec_()
+
 
 if __name__ == "__main__":
     # check arguments

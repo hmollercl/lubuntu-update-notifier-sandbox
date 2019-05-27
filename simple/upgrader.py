@@ -5,8 +5,8 @@
 import sys
 import os
 
-import pty
-import subprocess
+#import pty
+#import subprocess
 
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton,
 							QHBoxLayout, QVBoxLayout, QProgressBar, QTreeView,
@@ -25,7 +25,7 @@ from aptdaemon.enums import (EXIT_SUCCESS,
                              get_status_string_from_enum)
 from pathlib import Path
 
-class Dialog(QWidget):
+class DialogUpg(QWidget):
     def __init__(self, options=None):
         QWidget.__init__(self)
 
@@ -47,8 +47,10 @@ class Dialog(QWidget):
                             #stderr=subprocess.PIPE
                             stderr=self.slave)'''
 
+
         if options.fullUpgrade:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=False)
+            self.setWindowTitle('Full Upgrade')
         else:
             self.trans2 = self.apt_client.upgrade_system(safe_mode=True)
 
@@ -281,7 +283,7 @@ class Dialog(QWidget):
             remove_obsoleted_depends
             '''
             self.trans2.set_debconf_frontend('kde')
-            self.trans2.run()
+            #self.trans2.run()
 
         except (NotAuthorizedError, TransactionFailed) as e:
             print("Warning: install transaction not completed successfully:" +
@@ -293,7 +295,7 @@ class Dialog(QWidget):
 class App(QApplication):
     def __init__(self, options, *args):
         QApplication.__init__(self, *args)
-        self.dialog = Dialog(options)
+        self.dialog = DialogUpg(options)
         self.dialog.show()
 
 
