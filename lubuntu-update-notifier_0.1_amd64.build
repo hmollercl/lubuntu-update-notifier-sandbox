@@ -1,0 +1,12 @@
+ dpkg-buildpackage -us -uc -ui
+dpkg-buildpackage: info: source package lubuntu-update-notifier
+dpkg-buildpackage: info: source version 0.1
+dpkg-buildpackage: info: source distribution UNRELEASED
+dpkg-buildpackage: info: source changed by Hans P Möller <hmollercl@lubuntu.me>
+ dpkg-source --before-build .
+dpkg-buildpackage: info: host architecture amd64
+ fakeroot debian/rules clean
+dh clean --with python3 --buildsystem=pybuild
+dh: Please specify the compatibility level in debian/compat
+make: *** [debian/rules:4: clean] Error 2
+dpkg-buildpackage: error: fakeroot debian/rules clean subprocess returned exit status 2

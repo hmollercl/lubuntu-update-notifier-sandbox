@@ -7,7 +7,7 @@ while true;
         IFS=';'
         j=0
         for STRING in $OUT; do
-            case $j in 
+            case $j in
                 0)
                     UPG=$STRING;;
                 1)
@@ -20,6 +20,6 @@ while true;
         #./notifier.py -p ./upgrader.py >> ~/update_notifier.log 2>&1
         #date >> ~/update_notifier.log
         #./notifier_gui.py -u $UPG -s $SEC -p terminal
-        ./notifier_gui.py -u $UPG -s $SEC -p ./upgrader.py
+        ./notifier.py -u $UPG -s $SEC -p ./upgrader.py
         sleep 3600
 done;
