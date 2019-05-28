@@ -255,8 +255,11 @@ class DialogUpg(QWidget):
             if self.status != "status-downloading": #if "Downloading xxxxx" is handled by "upgrade_progress_download" in short_desc
                 self.plainTextEdit.appendPlainText(details)
                 self.plainTextEdit.moveCursor(QTextCursor.End)
+                self.label.setText(details)
+            else:
+                self.label.setText(self.detailText + "\n" + details) #if is downloading put the "Downloaded x of y" text
             #print("PTY:" + str(self.slave))
-            self.label.setText(self.detailText + "\n" details) #TODO check if with this during download appear downaloading x of y \n the name of the package.
+
             print("Status Details:" + details)
 
     def upgrade(self):
