@@ -1,0 +1,10 @@
+setup.cfg
+setup.py
+upg-notifier.sh
+lubuntu-update-notifier/__init__.py
+lubuntu-update-notifier/notifier.py
+lubuntu-update-notifier/upgrader.py
+lubuntu_update_notifier.egg-info/PKG-INFO
+lubuntu_update_notifier.egg-info/SOURCES.txt
+lubuntu_update_notifier.egg-info/dependency_links.txt
+lubuntu_update_notifier.egg-info/top_level.txt

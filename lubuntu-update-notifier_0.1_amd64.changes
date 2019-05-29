@@ -1,0 +1,31 @@
+Format: 1.8
+Date: Tue, 28 May 2019 16:42:14 -0400
+Source: lubuntu-update-notifier
+Binary: lubuntu-update-notifier
+Architecture: source all
+Version: 0.1
+Distribution: UNRELEASED
+Urgency: medium
+Maintainer: Hans P. Möller <hmoller@lubuntu.me>
+Changed-By: Hans P Möller <hmollercl@lubuntu.me>
+Description:
+ lubuntu-update-notifier - Daemon which notifies about package updates
+Changes:
+ lubuntu-update-notifier (0.1) UNRELEASED; urgency=medium
+ .
+   * Initial release. (Closes: #XXXXXX)
+Checksums-Sha1:
+ 8c771124d2dedb191e2758083c32b10d93e140f2 642 lubuntu-update-notifier_0.1.dsc
+ ad7d48af7218fc261bffe63f9b3a37dbdf0fb41f 5874 lubuntu-update-notifier_0.1.tar.gz
+ ca52e16ca91c90b6e7bd2f7b70c57b3a5a1c8570 6268 lubuntu-update-notifier_0.1_all.deb
+ b294db69ed0695596da3b7c581bd53e296cc8b8b 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
+Checksums-Sha256:
+ a98e2ea1f59adcc7be6808e3f2b2f6f6769ed21021f7bcb5f7ac9cc7f55f7f20 642 lubuntu-update-notifier_0.1.dsc
+ a0d6bb5d1bc41618e36adbc62c641604fc1dd8f0940b34d24967df451c99fcfa 5874 lubuntu-update-notifier_0.1.tar.gz
+ ff4870ae5b697bb51863fd867e7e90955760afd6189c15033a84c995cdca98f4 6268 lubuntu-update-notifier_0.1_all.deb
+ 819d4ed0a67a3a330bfda5759079cc02b9530d477a4a73efc6e24370a3730f7f 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
+Files:
+ 93ee12a3b6d59ea7abfc10a2e3781f40 642 admin optional lubuntu-update-notifier_0.1.dsc
+ a72523576c9068cd7d55f1844322c773 5874 admin optional lubuntu-update-notifier_0.1.tar.gz
+ 5f344788dddab84e1fd6fbecb1b68bfa 6268 admin optional lubuntu-update-notifier_0.1_all.deb
+ dc30e15091c82210d7b3ae3d714e7b1f 5976 admin optional lubuntu-update-notifier_0.1_amd64.buildinfo
