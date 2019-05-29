@@ -15,17 +15,17 @@ Changes:
  .
    * Initial release. (Closes: #XXXXXX)
 Checksums-Sha1:
- 8c771124d2dedb191e2758083c32b10d93e140f2 642 lubuntu-update-notifier_0.1.dsc
- ad7d48af7218fc261bffe63f9b3a37dbdf0fb41f 5874 lubuntu-update-notifier_0.1.tar.gz
- ca52e16ca91c90b6e7bd2f7b70c57b3a5a1c8570 6268 lubuntu-update-notifier_0.1_all.deb
- b294db69ed0695596da3b7c581bd53e296cc8b8b 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
+ b3fb46431d9e3a3792773e2dbafab66b03b30fbe 642 lubuntu-update-notifier_0.1.dsc
+ e89c7875d6117a0f14db61c58b4344538ea7c905 5805 lubuntu-update-notifier_0.1.tar.gz
+ cefe8c922a29d8ed5b5db7d116de4bb128e0cd8b 6568 lubuntu-update-notifier_0.1_all.deb
+ 0a386e5e864e1c0c6240b58f36a7f2fd1ca4b294 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
 Checksums-Sha256:
- a98e2ea1f59adcc7be6808e3f2b2f6f6769ed21021f7bcb5f7ac9cc7f55f7f20 642 lubuntu-update-notifier_0.1.dsc
- a0d6bb5d1bc41618e36adbc62c641604fc1dd8f0940b34d24967df451c99fcfa 5874 lubuntu-update-notifier_0.1.tar.gz
- ff4870ae5b697bb51863fd867e7e90955760afd6189c15033a84c995cdca98f4 6268 lubuntu-update-notifier_0.1_all.deb
- 819d4ed0a67a3a330bfda5759079cc02b9530d477a4a73efc6e24370a3730f7f 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
+ 54604bab0d38943d3acb38e397d27d1722ae6fe4f7d581d0d92a7f584dcd05d5 642 lubuntu-update-notifier_0.1.dsc
+ 86d56195eb81150e04ddd6b8e0251f4dd265d9e66af003579f015312d8816f4b 5805 lubuntu-update-notifier_0.1.tar.gz
+ 8fa16be20c131f8433d3d4c638d6a3f9814682a456e13e35132f03ee9fe8da45 6568 lubuntu-update-notifier_0.1_all.deb
+ 2656d8abc5801631720bb4ba4b1994c14d777782b817f528559ba6765791429a 5976 lubuntu-update-notifier_0.1_amd64.buildinfo
 Files:
- 93ee12a3b6d59ea7abfc10a2e3781f40 642 admin optional lubuntu-update-notifier_0.1.dsc
- a72523576c9068cd7d55f1844322c773 5874 admin optional lubuntu-update-notifier_0.1.tar.gz
- 5f344788dddab84e1fd6fbecb1b68bfa 6268 admin optional lubuntu-update-notifier_0.1_all.deb
- dc30e15091c82210d7b3ae3d714e7b1f 5976 admin optional lubuntu-update-notifier_0.1_amd64.buildinfo
+ 9e46eee6e4a302179369f61a101f1c72 642 admin optional lubuntu-update-notifier_0.1.dsc
+ 7428b0ba467dbb55c80ec96fd34d8259 5805 admin optional lubuntu-update-notifier_0.1.tar.gz
+ ce3374a914cff82eb7ead591dfc7fe1c 6568 admin optional lubuntu-update-notifier_0.1_all.deb
+ c4a22f358dd93b9bc6225233402d45f9 5976 admin optional lubuntu-update-notifier_0.1_amd64.buildinfo

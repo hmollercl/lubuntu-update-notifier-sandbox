@@ -4,17 +4,17 @@ Binary: lubuntu-update-notifier
 Architecture: all source
 Version: 0.1
 Checksums-Md5:
- 93ee12a3b6d59ea7abfc10a2e3781f40 642 lubuntu-update-notifier_0.1.dsc
- 5f344788dddab84e1fd6fbecb1b68bfa 6268 lubuntu-update-notifier_0.1_all.deb
+ 9e46eee6e4a302179369f61a101f1c72 642 lubuntu-update-notifier_0.1.dsc
+ ce3374a914cff82eb7ead591dfc7fe1c 6568 lubuntu-update-notifier_0.1_all.deb
 Checksums-Sha1:
- 8c771124d2dedb191e2758083c32b10d93e140f2 642 lubuntu-update-notifier_0.1.dsc
- ca52e16ca91c90b6e7bd2f7b70c57b3a5a1c8570 6268 lubuntu-update-notifier_0.1_all.deb
+ b3fb46431d9e3a3792773e2dbafab66b03b30fbe 642 lubuntu-update-notifier_0.1.dsc
+ cefe8c922a29d8ed5b5db7d116de4bb128e0cd8b 6568 lubuntu-update-notifier_0.1_all.deb
 Checksums-Sha256:
- a98e2ea1f59adcc7be6808e3f2b2f6f6769ed21021f7bcb5f7ac9cc7f55f7f20 642 lubuntu-update-notifier_0.1.dsc
- ff4870ae5b697bb51863fd867e7e90955760afd6189c15033a84c995cdca98f4 6268 lubuntu-update-notifier_0.1_all.deb
+ 54604bab0d38943d3acb38e397d27d1722ae6fe4f7d581d0d92a7f584dcd05d5 642 lubuntu-update-notifier_0.1.dsc
+ 8fa16be20c131f8433d3d4c638d6a3f9814682a456e13e35132f03ee9fe8da45 6568 lubuntu-update-notifier_0.1_all.deb
 Build-Origin: Ubuntu
 Build-Architecture: amd64
-Build-Date: Wed, 29 May 2019 16:35:59 -0400
+Build-Date: Wed, 29 May 2019 17:37:40 -0400
 Build-Tainted-By:
  merged-usr-via-symlinks
  usr-local-has-programs
