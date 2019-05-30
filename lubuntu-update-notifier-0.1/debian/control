@@ -8,7 +8,6 @@ Build-Depends: debhelper (>=11~),
                python3-all,
                python3-setuptools,
 Standards-Version: 4.0.0
-X-Python3-Version: >= 3.X
 
 Package: lubuntu-update-notifier
 Architecture: all

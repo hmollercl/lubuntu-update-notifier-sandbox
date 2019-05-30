@@ -2,7 +2,7 @@
 
 from setuptools import setup
 #from distutils.core import setup
-from DistUtilsExtra.command import *
+#from DistUtilsExtra.command import *
 
 setup(
     name="lubuntu-update-notifier",
