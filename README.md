@@ -1,4 +1,7 @@
 # lubuntu-update-notifier
+
+final code maintained in lubuntu-team/lubuntu-update-notifier
+
 Installation Instruction:
 Install packages (via apt or similar):
 - update-notifier-common
